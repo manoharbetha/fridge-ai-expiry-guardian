@@ -1,6 +1,6 @@
 
 const GEMINI_API_KEY = 'AIzaSyC30AJocdU8MIC6guSg5SkUOZ2V7dMAijk';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 export interface ParsedFoodItem {
   name: string;
@@ -19,6 +19,8 @@ export interface RecipeRecommendation {
 
 export class GeminiService {
   private async makeRequest(prompt: string): Promise<string> {
+    console.log('Making Gemini API request with prompt:', prompt.substring(0, 100) + '...');
+    
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -33,12 +35,21 @@ export class GeminiService {
       }),
     });
 
+    console.log('Gemini API response status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('Gemini API error response:', errorText);
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    return data.candidates[0]?.content?.parts[0]?.text || '';
+    console.log('Gemini API response data:', data);
+    
+    const responseText = data.candidates[0]?.content?.parts[0]?.text || '';
+    console.log('Extracted response text:', responseText);
+    
+    return responseText;
   }
 
   async parseNaturalLanguageInput(input: string): Promise<ParsedFoodItem[]> {
@@ -58,8 +69,11 @@ export class GeminiService {
       const response = await this.makeRequest(prompt);
       const jsonMatch = response.match(/\[.*\]/s);
       if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
+        const parsed = JSON.parse(jsonMatch[0]);
+        console.log('Parsed food items:', parsed);
+        return parsed;
       }
+      console.log('No JSON found in response, returning empty array');
       return [];
     } catch (error) {
       console.error('Error parsing natural language:', error);
@@ -85,8 +99,11 @@ export class GeminiService {
       const response = await this.makeRequest(prompt);
       const jsonMatch = response.match(/\[.*\]/s);
       if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
+        const parsed = JSON.parse(jsonMatch[0]);
+        console.log('Parsed recipes:', parsed);
+        return parsed;
       }
+      console.log('No JSON found in recipe response, returning empty array');
       return [];
     } catch (error) {
       console.error('Error getting recipe recommendations:', error);
@@ -105,7 +122,9 @@ export class GeminiService {
     `;
 
     try {
-      return await this.makeRequest(prompt);
+      const response = await this.makeRequest(prompt);
+      console.log('Natural query response:', response);
+      return response;
     } catch (error) {
       console.error('Error processing natural query:', error);
       return 'Sorry, I could not process your request right now.';
