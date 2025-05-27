@@ -1,13 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import ItemDashboard from '@/components/ItemDashboard';
 import AddItemForm from '@/components/AddItemForm';
 import NotificationPanel from '@/components/NotificationPanel';
+import NaturalLanguageInput from '@/components/NaturalLanguageInput';
+import RecipeRecommendations from '@/components/RecipeRecommendations';
+import SmartQuery from '@/components/SmartQuery';
 import { FridgeItem } from '@/types/FridgeItem';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Plus, Refrigerator } from 'lucide-react';
+import { ParsedFoodItem } from '@/services/geminiService';
 
 const Index = () => {
   const [items, setItems] = useState<FridgeItem[]>([]);
@@ -60,6 +63,24 @@ const Index = () => {
     setItems(prev => [...prev, item]);
     setShowAddForm(false);
     toast.success('Item added to your fridge!');
+  };
+
+  const addItemsFromAI = (parsedItems: ParsedFoodItem[]) => {
+    const today = new Date();
+    const defaultExpiry = new Date();
+    defaultExpiry.setDate(today.getDate() + 7); // Default 1 week expiry
+    
+    parsedItems.forEach(parsedItem => {
+      const newItem: Omit<FridgeItem, 'id' | 'status'> = {
+        name: parsedItem.name,
+        category: parsedItem.category,
+        openDate: today,
+        printedExpiry: defaultExpiry,
+        predictedExpiry: defaultExpiry,
+        notificationSent: false
+      };
+      addItem(newItem);
+    });
   };
 
   const removeItem = (id: string) => {
@@ -126,13 +147,20 @@ const Index = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Dashboard */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6">
             <ItemDashboard items={items} onRemoveItem={removeItem} />
+            
+            {/* AI Features Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <NaturalLanguageInput onItemsParsed={addItemsFromAI} />
+              <SmartQuery items={items} />
+            </div>
           </div>
 
-          {/* Notifications Panel */}
-          <div>
+          {/* Right Sidebar */}
+          <div className="space-y-6">
             <NotificationPanel items={expiringItems} />
+            <RecipeRecommendations items={items} />
           </div>
         </div>
 
