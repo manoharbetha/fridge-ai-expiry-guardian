@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BarChart3, PieChart, TrendingUp, Clock } from 'lucide-react';
+import { BarChart3, PieChart, TrendingUp } from 'lucide-react';
 import { FridgeItem } from '@/types/FridgeItem';
-import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 interface AnalyticsPanelProps {
   items: FridgeItem[];
@@ -31,30 +32,6 @@ const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({ items }) => {
   const statusData = Object.entries(statusStats).map(([status, count]) => ({
     name: status.charAt(0).toUpperCase() + status.slice(1),
     value: count
-  }));
-
-  // Days until expiry data
-  const expiryData = items.map(item => {
-    const today = new Date();
-    const soonestExpiry = new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime()));
-    const daysLeft = Math.ceil((soonestExpiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
-    let category = 'Expired';
-    if (daysLeft > 7) category = '7+ days';
-    else if (daysLeft > 3) category = '4-7 days';
-    else if (daysLeft > 0) category = '1-3 days';
-    
-    return { category, daysLeft, name: item.name };
-  });
-
-  const expiryStats = expiryData.reduce((acc, item) => {
-    acc[item.category] = (acc[item.category] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const expiryChartData = Object.entries(expiryStats).map(([category, count]) => ({
-    name: category,
-    count
   }));
 
   const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#3b82f6', '#f97316', '#06b6d4', '#84cc16'];
@@ -103,8 +80,8 @@ const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({ items }) => {
             <h3 className="text-lg font-semibold text-gray-800">Category Distribution</h3>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="h-64">
+          <div className="flex flex-col gap-6">
+            <div className="h-64 flex justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsPieChart>
                   <Pie
@@ -120,12 +97,11 @@ const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({ items }) => {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
                 </RechartsPieChart>
               </ResponsiveContainer>
             </div>
             
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {categoryData.map((category, index) => (
                 <div key={category.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
@@ -133,37 +109,16 @@ const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({ items }) => {
                       className="w-4 h-4 rounded-full" 
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     />
-                    <span className="text-2xl">{getCategoryEmoji(category.name)}</span>
-                    <span className="font-medium">{category.name}</span>
+                    <span className="text-xl">{getCategoryEmoji(category.name)}</span>
+                    <span className="font-medium text-sm">{category.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline">{category.value} items</Badge>
-                    <span className="text-sm text-gray-500">{category.percentage}%</span>
+                    <Badge variant="outline" className="text-xs">{category.value} items</Badge>
+                    <span className="text-xs text-gray-500">{category.percentage}%</span>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-
-        {/* Expiry Timeline */}
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <Clock className="w-5 h-5 text-amber-600" />
-            <h3 className="text-lg font-semibold text-gray-800">Expiry Timeline</h3>
-          </div>
-          
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={expiryChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="count" fill="#f59e0b" />
-              </BarChart>
-            </ResponsiveContainer>
           </div>
         </div>
 
