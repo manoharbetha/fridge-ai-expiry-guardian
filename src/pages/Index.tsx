@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import ItemDashboard from '@/components/ItemDashboard';
@@ -9,7 +10,7 @@ import SmartQuery from '@/components/SmartQuery';
 import { FridgeItem } from '@/types/FridgeItem';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Plus, Refrigerator } from 'lucide-react';
+import { Plus, Refrigerator, Trash2 } from 'lucide-react';
 import { ParsedFoodItem } from '@/services/geminiService';
 
 const Index = () => {
@@ -88,6 +89,26 @@ const Index = () => {
     toast.success('Item removed from fridge');
   };
 
+  const removeExpiredItems = () => {
+    const today = new Date();
+    const expiredItems = items.filter(item => {
+      const expiryDate = new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime()));
+      return expiryDate < today;
+    });
+    
+    if (expiredItems.length === 0) {
+      toast.info('No expired items to remove');
+      return;
+    }
+    
+    setItems(prev => prev.filter(item => {
+      const expiryDate = new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime()));
+      return expiryDate >= today;
+    }));
+    
+    toast.success(`Removed ${expiredItems.length} expired item(s)`);
+  };
+
   const getDaysUntilExpiry = (date: Date) => {
     const today = new Date();
     const diffTime = date.getTime() - today.getTime();
@@ -95,10 +116,15 @@ const Index = () => {
   };
 
   const expiringItems = items.filter(item => item.status === 'critical' || item.status === 'warning');
+  const expiredItemsCount = items.filter(item => {
+    const today = new Date();
+    const expiryDate = new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime()));
+    return expiryDate < today;
+  }).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
@@ -112,17 +138,36 @@ const Index = () => {
               <p className="text-gray-600">AI-powered expiry tracking and waste reduction</p>
             </div>
           </div>
-          <Button 
-            onClick={() => setShowAddForm(true)}
-            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Item
-          </Button>
+          <div className="flex gap-3">
+            {expiredItemsCount > 0 && (
+              <Button 
+                onClick={removeExpiredItems}
+                variant="destructive"
+                className="shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Remove Expired ({expiredItemsCount})
+              </Button>
+            )}
+            <Button 
+              onClick={() => setShowAddForm(true)}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Item
+            </Button>
+          </div>
+        </div>
+
+        {/* Smart Input Feature - TOP PRIORITY */}
+        <div className="mb-8">
+          <div className="max-w-2xl mx-auto">
+            <NaturalLanguageInput onItemsParsed={addItemsFromAI} />
+          </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">{items.length}</div>
@@ -143,25 +188,37 @@ const Index = () => {
               <div className="text-gray-600">Fresh Items</div>
             </div>
           </Card>
+          <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-red-600">{expiredItemsCount}</div>
+              <div className="text-gray-600">Expired Items</div>
+            </div>
+          </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Dashboard */}
-          <div className="lg:col-span-2 space-y-6">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          {/* Left Column - Items Dashboard */}
+          <div className="lg:col-span-2">
             <ItemDashboard items={items} onRemoveItem={removeItem} />
-            
-            {/* AI Features Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <NaturalLanguageInput onItemsParsed={addItemsFromAI} />
-              <SmartQuery items={items} />
-            </div>
           </div>
 
-          {/* Right Sidebar */}
-          <div className="space-y-6">
+          {/* Right Column - Notifications */}
+          <div>
             <NotificationPanel items={expiringItems} />
-            <RecipeRecommendations items={items} />
           </div>
+        </div>
+
+        {/* AI Query Section */}
+        <div className="mb-8">
+          <div className="max-w-2xl mx-auto">
+            <SmartQuery items={items} />
+          </div>
+        </div>
+
+        {/* Recipe Recommendations - BOTTOM PRIORITY */}
+        <div className="max-w-4xl mx-auto">
+          <RecipeRecommendations items={items} />
         </div>
 
         {/* Add Item Modal */}
