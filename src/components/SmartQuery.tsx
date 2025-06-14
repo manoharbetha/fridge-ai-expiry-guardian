@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,13 +16,38 @@ const SmartQuery: React.FC<SmartQueryProps> = ({ items }) => {
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Clear response when items change to reflect current state
+  useEffect(() => {
+    if (response) {
+      setResponse('');
+    }
+  }, [items.length]); // Clear when items are added/removed
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
 
+    console.log('Processing query with current items:', items.map(item => `${item.name} (${item.status})`));
+    
     setIsLoading(true);
     try {
       const aiResponse = await geminiService.processNaturalQuery(query, items);
+      setResponse(aiResponse);
+    } catch (error) {
+      setResponse('Sorry, I could not process your question right now.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleQuickQuestion = async (question: string) => {
+    setQuery(question);
+    
+    console.log('Processing quick question with current items:', items.map(item => `${item.name} (${item.status})`));
+    
+    setIsLoading(true);
+    try {
+      const aiResponse = await geminiService.processNaturalQuery(question, items);
       setResponse(aiResponse);
     } catch (error) {
       setResponse('Sorry, I could not process your question right now.');
@@ -43,6 +68,9 @@ const SmartQuery: React.FC<SmartQueryProps> = ({ items }) => {
       <div className="flex items-center gap-2 mb-3">
         <MessageSquare className="w-4 h-4 text-purple-600" />
         <h3 className="font-medium text-purple-800">Ask about your fridge</h3>
+        <div className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded">
+          {items.length} items
+        </div>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-3">
@@ -76,7 +104,8 @@ const SmartQuery: React.FC<SmartQueryProps> = ({ items }) => {
             variant="ghost"
             size="sm"
             className="text-xs h-6 px-2 text-purple-600 hover:bg-purple-100"
-            onClick={() => setQuery(question)}
+            onClick={() => handleQuickQuestion(question)}
+            disabled={isLoading}
           >
             {question}
           </Button>
@@ -86,6 +115,14 @@ const SmartQuery: React.FC<SmartQueryProps> = ({ items }) => {
       {response && (
         <div className="mt-4 p-3 bg-white rounded-lg border border-purple-200">
           <div className="text-sm text-gray-700">{response}</div>
+        </div>
+      )}
+
+      {items.length === 0 && (
+        <div className="mt-4 p-3 bg-purple-100 rounded-lg">
+          <div className="text-xs text-purple-700">
+            Add items to your fridge to start asking questions!
+          </div>
         </div>
       )}
     </Card>

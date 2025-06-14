@@ -84,14 +84,14 @@ export class GeminiService {
   async getRecipeRecommendations(expiringItems: string[]): Promise<RecipeRecommendation[]> {
     const itemsList = expiringItems.join(', ');
     const prompt = `
-    Given these food items that are expiring soon: ${itemsList}
+    Given these food items: ${itemsList}
     
-    Suggest 3 recipes that use these ingredients to minimize food waste. Return ONLY a JSON array with this exact format:
+    Suggest 3 recipes that use these ingredients. Return ONLY a JSON array with this exact format:
     [{"title": "Recipe Name", "description": "Brief description", "ingredients": ["ingredient1", "ingredient2"], "cookingTime": "time", "difficulty": "easy/medium/hard"}]
     
     Focus on:
     - Quick recipes (under 30 minutes when possible)
-    - Using the expiring ingredients as main components
+    - Using the provided ingredients as main components
     - Simple, accessible recipes
     `;
 
@@ -112,13 +112,18 @@ export class GeminiService {
   }
 
   async processNaturalQuery(query: string, items: any[]): Promise<string> {
-    const itemNames = items.map(item => `${item.name} (${item.status})`).join(', ');
+    const itemsList = items.map(item => {
+      const status = item.status === 'critical' ? '(expiring soon!)' : 
+                   item.status === 'warning' ? '(expiring this week)' : '(fresh)';
+      return `${item.name} ${status}`;
+    }).join(', ');
+    
     const prompt = `
-    You are a smart fridge assistant. The user has these items: ${itemNames}
+    You are a smart fridge assistant. The user has these ${items.length} items in their fridge: ${itemsList || 'No items currently'}
     
     User query: "${query}"
     
-    Provide a helpful, conversational response about their fridge contents. Be concise and friendly.
+    Provide a helpful, conversational response about their fridge contents. Be specific and mention actual items they have. Be concise and friendly.
     `;
 
     try {

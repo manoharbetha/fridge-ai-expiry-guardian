@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ChefHat, Clock, Loader2, Star } from 'lucide-react';
 import { geminiService, RecipeRecommendation } from '@/services/geminiService';
 import { FridgeItem } from '@/types/FridgeItem';
@@ -15,15 +16,28 @@ const RecipeRecommendations: React.FC<RecipeRecommendationsProps> = ({ items }) 
   const [recipes, setRecipes] = useState<RecipeRecommendation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
-  const warningItems = items.filter(item => item.status === 'warning' || item.status === 'critical');
+  // Initialize all items as selected
+  useEffect(() => {
+    if (items.length > 0 && selectedItems.length === 0) {
+      setSelectedItems(items.map(item => item.id));
+    }
+  }, [items]);
+
+  // Update selected items when items change (remove deleted items)
+  useEffect(() => {
+    const currentItemIds = items.map(item => item.id);
+    setSelectedItems(prev => prev.filter(id => currentItemIds.includes(id)));
+  }, [items]);
 
   const loadRecipes = async () => {
-    if (warningItems.length === 0) return;
+    const selectedItemsData = items.filter(item => selectedItems.includes(item.id));
+    if (selectedItemsData.length === 0) return;
 
     setIsLoading(true);
     try {
-      const itemNames = warningItems.map(item => item.name);
+      const itemNames = selectedItemsData.map(item => item.name);
       const recommendations = await geminiService.getRecipeRecommendations(itemNames);
       setRecipes(recommendations);
       setHasLoaded(true);
@@ -34,11 +48,13 @@ const RecipeRecommendations: React.FC<RecipeRecommendationsProps> = ({ items }) 
     }
   };
 
-  useEffect(() => {
-    if (warningItems.length > 0 && !hasLoaded) {
-      loadRecipes();
-    }
-  }, [warningItems.length]);
+  const handleItemToggle = (itemId: string) => {
+    setSelectedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
@@ -49,7 +65,9 @@ const RecipeRecommendations: React.FC<RecipeRecommendationsProps> = ({ items }) 
     }
   };
 
-  if (warningItems.length === 0) {
+  const selectedItemsData = items.filter(item => selectedItems.includes(item.id));
+
+  if (items.length === 0) {
     return (
       <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
         <div className="flex items-center gap-2 mb-4">
@@ -57,8 +75,8 @@ const RecipeRecommendations: React.FC<RecipeRecommendationsProps> = ({ items }) 
           <h2 className="text-xl font-bold text-gray-800">Recipe Suggestions</h2>
         </div>
         <div className="text-center py-8">
-          <div className="text-gray-400 text-lg mb-2">No expiring items</div>
-          <div className="text-gray-500 text-sm">Recipe suggestions will appear when you have items expiring soon</div>
+          <div className="text-gray-400 text-lg mb-2">No items in fridge</div>
+          <div className="text-gray-500 text-sm">Add some items to get recipe suggestions</div>
         </div>
       </Card>
     );
@@ -71,16 +89,43 @@ const RecipeRecommendations: React.FC<RecipeRecommendationsProps> = ({ items }) 
           <ChefHat className="w-5 h-5 text-green-600" />
           <h2 className="text-xl font-bold text-gray-800">Recipe Suggestions</h2>
         </div>
-        {hasLoaded && (
+        {selectedItems.length > 0 && (
           <Button
             onClick={loadRecipes}
             variant="outline"
             size="sm"
             disabled={isLoading}
           >
-            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Refresh'}
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Get Recipes'}
           </Button>
         )}
+      </div>
+
+      {/* Item Selection */}
+      <div className="mb-6">
+        <h3 className="text-sm font-medium text-gray-700 mb-3">Select items for recipes:</h3>
+        <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+          {items.map((item) => (
+            <div key={item.id} className="flex items-center space-x-2">
+              <Checkbox
+                id={item.id}
+                checked={selectedItems.includes(item.id)}
+                onCheckedChange={() => handleItemToggle(item.id)}
+              />
+              <label
+                htmlFor={item.id}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                {item.name}
+                {item.status === 'critical' && <span className="text-red-500 ml-1">⚠️</span>}
+                {item.status === 'warning' && <span className="text-amber-500 ml-1">⚡</span>}
+              </label>
+            </div>
+          ))}
+        </div>
+        <div className="text-xs text-gray-500 mt-2">
+          {selectedItems.length} of {items.length} items selected
+        </div>
       </div>
 
       {isLoading && !hasLoaded ? (
@@ -90,8 +135,8 @@ const RecipeRecommendations: React.FC<RecipeRecommendationsProps> = ({ items }) 
         </div>
       ) : recipes.length > 0 ? (
         <div className="space-y-4">
-          <div className="text-sm text-amber-700 bg-amber-50 p-3 rounded-lg mb-4">
-            🍳 Using: {warningItems.map(item => item.name).join(', ')}
+          <div className="text-sm text-green-700 bg-green-50 p-3 rounded-lg mb-4">
+            🍳 Using: {selectedItemsData.map(item => item.name).join(', ')}
           </div>
           
           {recipes.map((recipe, index) => (
@@ -114,7 +159,7 @@ const RecipeRecommendations: React.FC<RecipeRecommendationsProps> = ({ items }) 
                 </div>
                 <div className="flex items-center gap-1">
                   <Star className="w-3 h-3" />
-                  Waste-reducing
+                  AI Recommended
                 </div>
               </div>
               
@@ -136,11 +181,16 @@ const RecipeRecommendations: React.FC<RecipeRecommendationsProps> = ({ items }) 
             </Card>
           ))}
         </div>
+      ) : selectedItems.length === 0 ? (
+        <div className="text-center py-8">
+          <div className="text-gray-400 text-lg mb-2">No items selected</div>
+          <div className="text-gray-500 text-sm">Select items above to get recipe suggestions</div>
+        </div>
       ) : (
         <div className="text-center py-8">
-          <div className="text-gray-400 text-lg mb-2">No recipes found</div>
+          <div className="text-gray-400 text-lg mb-2">Ready for recipes!</div>
           <Button onClick={loadRecipes} variant="outline">
-            Try Again
+            Get Recipe Suggestions
           </Button>
         </div>
       )}
