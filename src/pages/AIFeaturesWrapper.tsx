@@ -7,56 +7,43 @@ import { FridgeItem } from '@/types/FridgeItem';
 const AIFeaturesWrapper = () => {
   const [items, setItems] = useState<FridgeItem[]>([]);
 
-  // Get items from localStorage and update when storage changes
+  // Get items from localStorage or use mock data
   useEffect(() => {
-    const loadItems = () => {
-      try {
-        const storedItems = localStorage.getItem('fridgeItems');
-        if (storedItems) {
-          const parsedItems = JSON.parse(storedItems);
-          // Convert date strings back to Date objects
-          const itemsWithDates = parsedItems.map((item: any) => ({
-            ...item,
-            openDate: new Date(item.openDate),
-            printedExpiry: new Date(item.printedExpiry),
-            predictedExpiry: new Date(item.predictedExpiry)
-          }));
-          setItems(itemsWithDates);
-          console.log('AI Features loaded items:', itemsWithDates.map(item => `${item.name} (${item.status})`));
-        } else {
-          setItems([]);
-          console.log('No items found in localStorage');
-        }
-      } catch (error) {
-        console.error('Error loading items from localStorage:', error);
-        setItems([]);
+    // In a real app, you'd get this from a global state management solution
+    // For now, we'll use the same mock data
+    const mockItems: FridgeItem[] = [
+      {
+        id: '1',
+        name: 'Organic Milk',
+        category: 'dairy',
+        openDate: new Date('2025-05-25'),
+        printedExpiry: new Date('2025-05-30'),
+        predictedExpiry: new Date('2025-05-28'),
+        status: 'warning',
+        notificationSent: false
+      },
+      {
+        id: '2',
+        name: 'Greek Yogurt',
+        category: 'dairy',
+        openDate: new Date('2025-05-20'),
+        printedExpiry: new Date('2025-06-05'),
+        predictedExpiry: new Date('2025-06-03'),
+        status: 'fresh',
+        notificationSent: false
+      },
+      {
+        id: '3',
+        name: 'Baby Spinach',
+        category: 'vegetables',
+        openDate: new Date('2025-05-26'),
+        printedExpiry: new Date('2025-05-29'),
+        predictedExpiry: new Date('2025-05-27'),
+        status: 'critical',
+        notificationSent: false
       }
-    };
-
-    // Load initial items
-    loadItems();
-
-    // Listen for storage changes from other tabs
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'fridgeItems') {
-        console.log('Storage changed, reloading items...');
-        loadItems();
-      }
-    };
-
-    // Listen for custom events (when items are updated from same tab)
-    const handleItemsUpdate = () => {
-      console.log('Items updated event received, reloading...');
-      loadItems();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('fridgeItemsUpdated', handleItemsUpdate);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('fridgeItemsUpdated', handleItemsUpdate);
-    };
+    ];
+    setItems(mockItems);
   }, []);
 
   return (
