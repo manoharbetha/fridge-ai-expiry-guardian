@@ -14,9 +14,18 @@ const AIFeaturesWrapper = () => {
         const storedItems = localStorage.getItem('fridgeItems');
         if (storedItems) {
           const parsedItems = JSON.parse(storedItems);
-          setItems(parsedItems);
+          // Convert date strings back to Date objects
+          const itemsWithDates = parsedItems.map((item: any) => ({
+            ...item,
+            openDate: new Date(item.openDate),
+            printedExpiry: new Date(item.printedExpiry),
+            predictedExpiry: new Date(item.predictedExpiry)
+          }));
+          setItems(itemsWithDates);
+          console.log('AI Features loaded items:', itemsWithDates.map(item => `${item.name} (${item.status})`));
         } else {
           setItems([]);
+          console.log('No items found in localStorage');
         }
       } catch (error) {
         console.error('Error loading items from localStorage:', error);
@@ -27,15 +36,17 @@ const AIFeaturesWrapper = () => {
     // Load initial items
     loadItems();
 
-    // Listen for storage changes
+    // Listen for storage changes from other tabs
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'fridgeItems') {
+        console.log('Storage changed, reloading items...');
         loadItems();
       }
     };
 
     // Listen for custom events (when items are updated from same tab)
     const handleItemsUpdate = () => {
+      console.log('Items updated event received, reloading...');
       loadItems();
     };
 
