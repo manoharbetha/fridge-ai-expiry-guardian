@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { TextRotate } from "@/components/ui/text-rotate";
 import { motion } from "motion/react";
 export default function HeroSection() {
-  return <section className="relative w-full py-16 md:py-28 bg-gradient-to-br from-green-50 via-emerald-100 to-teal-50">
+  return <section className="relative w-full py-16 bg-gradient-to-br from-green-50 via-emerald-100 to-teal-50 md:py-[100px]">
       <div className="max-w-5xl mx-auto flex flex-col items-center text-center px-4 gap-8">
         <h1 className="text-3xl sm:text-5xl font-bold mb-2 bg-gradient-to-b from-emerald-800 to-emerald-400 bg-clip-text text-transparent px-0 mx-0 my-0 py-[8px] md:text-5xl">Smart Fridge Management</h1>
         <div className="max-w-2xl mx-auto mb-4 text-lg md:text-2xl text-emerald-900/80 font-medium">
