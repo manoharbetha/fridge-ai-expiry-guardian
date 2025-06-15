@@ -189,19 +189,12 @@ const Index = () => {
         </div>
 
         {/* Main Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Main Column */}
-          <div className="lg:col-span-3 space-y-8">
-            <ItemDashboard items={items} onRemoveItem={removeItem} />
-            <RecipeRecommendations items={items} />
-          </div>
-
-          {/* Side Column (AI & Notifications) */}
-          <div className="lg:col-span-2 space-y-8">
-            <NaturalLanguageInput onItemsParsed={addItemsFromAI} />
-            <SmartQuery items={items} />
-            <NotificationPanel items={expiringItems} />
-          </div>
+        <div className="space-y-8">
+          <NaturalLanguageInput onItemsParsed={addItemsFromAI} />
+          <SmartQuery items={items} />
+          <NotificationPanel items={expiringItems} />
+          <ItemDashboard items={items} onRemoveItem={removeItem} />
+          <RecipeRecommendations items={items} />
         </div>
 
         {/* Add Item Modal */}
