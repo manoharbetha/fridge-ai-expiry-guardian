@@ -203,7 +203,8 @@ const Index = () => {
   }).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-background dark:via-[#222d24] dark:to-[#14281e] transition-colors">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 
+      dark:from-[#274046] dark:via-[#202537] dark:to-[#4e4376] transition-colors">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
