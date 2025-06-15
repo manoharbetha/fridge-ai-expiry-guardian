@@ -48,7 +48,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
       <Button
         variant="outline"
         onClick={onLogout}
-        className="shadow-lg hover:shadow-xl transition-all duration-300"
+        className="shadow-lg hover:shadow-xl transition-all duration-300 ml-6"
       >
         <LogOut className="w-4 h-4 mr-2" />
         Logout
