@@ -14,6 +14,7 @@ import { ParsedFoodItem } from '@/services/geminiService';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
+import ThemeToggle from '@/components/ThemeToggle';
 
 // Utility: Convert db row to FridgeItem (dates as Date objects, status normalized)
 function parseDbFridgeItem(row: any): FridgeItem {
@@ -188,8 +189,8 @@ const Index = () => {
 
   if (loading || !session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
-        <div className="text-gray-600">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-background dark:via-[#222d24] dark:to-[#14281e]">
+        <div className="text-gray-600 dark:text-gray-200">Loading...</div>
       </div>
     );
   }
@@ -202,25 +203,26 @@ const Index = () => {
   }).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-background dark:via-[#222d24] dark:to-[#14281e] transition-colors">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg">
-              <Refrigerator className="w-8 h-8 text-white" />
+            <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 dark:from-[#34d399] dark:to-green-700 rounded-xl shadow-lg">
+              <Refrigerator className="w-8 h-8 text-white dark:text-gray-900" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent dark:from-teal-200 dark:to-green-300 dark:bg-clip-text">
                 Smart Fridge Manager
               </h1>
-              <p className="text-gray-600">AI-powered expiry tracking and waste reduction</p>
+              <p className="text-gray-600 dark:text-gray-300">AI-powered expiry tracking and waste reduction</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-gray-700">{session.user.email}</p>
-              <p className="text-xs text-gray-500">Welcome!</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{session.user.email}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Welcome!</p>
             </div>
             {expiredItemsCount > 0 && (
               <Button 
@@ -234,7 +236,7 @@ const Index = () => {
             )}
             <Button 
               onClick={() => setShowAddForm(true)}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 dark:from-[#34d399] dark:to-green-700"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Item
@@ -248,30 +250,30 @@ const Index = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <Card className="p-6 bg-white/80 dark:bg-[#112417]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">{items.length}</div>
-              <div className="text-gray-600">Total Items</div>
+              <div className="text-3xl font-bold text-green-600 dark:text-green-300">{items.length}</div>
+              <div className="text-gray-600 dark:text-gray-300">Total Items</div>
             </div>
           </Card>
-          <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <Card className="p-6 bg-white/80 dark:bg-[#16291f]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="text-center">
-              <div className="text-3xl font-bold text-amber-600">{expiringItems.length}</div>
-              <div className="text-gray-600">Expiring Soon</div>
+              <div className="text-3xl font-bold text-amber-600 dark:text-yellow-400">{expiringItems.length}</div>
+              <div className="text-gray-600 dark:text-gray-300">Expiring Soon</div>
             </div>
           </Card>
-          <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <Card className="p-6 bg-white/80 dark:bg-[#16312c]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-3xl font-bold text-blue-600 dark:text-blue-300">
                 {items.filter(item => item.status === 'fresh').length}
               </div>
-              <div className="text-gray-600">Fresh Items</div>
+              <div className="text-gray-600 dark:text-gray-300">Fresh Items</div>
             </div>
           </Card>
-          <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <Card className="p-6 bg-white/80 dark:bg-[#1d2429]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">{expiredItemsCount}</div>
-              <div className="text-gray-600">Expired Items</div>
+              <div className="text-3xl font-bold text-red-600 dark:text-red-400">{expiredItemsCount}</div>
+              <div className="text-gray-600 dark:text-gray-300">Expired Items</div>
             </div>
           </Card>
         </div>
@@ -284,8 +286,8 @@ const Index = () => {
           <ItemDashboard items={items} onRemoveItem={removeItem} />
           <RecipeRecommendations items={items} />
           {itemsLoading && (
-            <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-8 shadow-lg text-center text-lg">
+            <div className="fixed inset-0 bg-black/20 dark:bg-black/40 flex items-center justify-center z-50">
+              <div className="bg-white dark:bg-background rounded-lg p-8 shadow-lg text-center text-lg dark:text-gray-200">
                 Loading your fridge items...
               </div>
             </div>
@@ -294,8 +296,8 @@ const Index = () => {
 
         {/* Add Item Modal */}
         {showAddForm && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-background rounded-2xl p-6 w-full max-w-md shadow-2xl">
               <AddItemForm 
                 onAddItem={addItem} 
                 onCancel={() => setShowAddForm(false)} 
