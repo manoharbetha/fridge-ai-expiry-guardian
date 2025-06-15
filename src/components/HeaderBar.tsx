@@ -8,14 +8,17 @@ interface HeaderBarProps {
   email: string;
   expiredItemsCount: number;
   onRemoveExpired: () => void;
+  onPurgeExpired: () => void;
   onAddItem: () => void;
   onLogout: () => void;
 }
 
+// Add PurgeAllExpired button next to Remove Expired if there are expired items
 const HeaderBar: React.FC<HeaderBarProps> = ({
   email,
   expiredItemsCount,
   onRemoveExpired,
+  onPurgeExpired,
   onAddItem,
   onLogout
 }) => (
@@ -40,14 +43,24 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
         <p className="text-xs text-gray-500 dark:text-black">Welcome!</p>
       </div>
       {expiredItemsCount > 0 && (
-        <Button
-          onClick={onRemoveExpired}
-          variant="destructive"
-          className="shadow-lg hover:shadow-xl transition-all duration-300"
-        >
-          <Trash2 className="w-4 h-4 mr-2" />
-          Remove Expired ({expiredItemsCount})
-        </Button>
+        <>
+          <Button
+            onClick={onRemoveExpired}
+            variant="destructive"
+            className="shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Remove Expired ({expiredItemsCount})
+          </Button>
+          <Button
+            onClick={onPurgeExpired}
+            variant="destructive"
+            className="shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-red-700 bg-red-700 text-white"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Purge All Expired
+          </Button>
+        </>
       )}
       <Button
         onClick={onAddItem}

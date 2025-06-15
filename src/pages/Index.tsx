@@ -182,6 +182,28 @@ const Index = () => {
     }
   };
 
+  // Purge ALL expired items - hard delete
+  const purgeExpiredItems = async () => {
+    const today = new Date();
+    const expiredItems = items.filter(item => {
+      const expiryDate = new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime()));
+      return expiryDate < today;
+    });
+    if (expiredItems.length === 0) {
+      toast.info('No expired items to purge');
+      return;
+    }
+    const expiredIds = expiredItems.map(item => item.id);
+    // Permanently delete expired items
+    const { error } = await supabase.from('food_items').delete().in('id', expiredIds);
+    if (error) {
+      toast.error('Failed to purge expired items');
+    } else {
+      setItems(prev => prev.filter(item => !expiredIds.includes(item.id)));
+      toast.success(`Purged ${expiredItems.length} expired item(s) permanently`);
+    }
+  };
+
   const handleLogout = async () => {
     setLoading(true);
     await supabase.auth.signOut();
@@ -214,6 +236,7 @@ const Index = () => {
           email={session.user.email}
           expiredItemsCount={expiredItemsCount}
           onRemoveExpired={removeExpiredItems}
+          onPurgeExpired={purgeExpiredItems}
           onAddItem={() => setShowAddForm(true)}
           onLogout={handleLogout}
         />
