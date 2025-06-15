@@ -1,22 +1,18 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Refrigerator, Trash2, LogOut } from 'lucide-react';
-
 interface HeaderBarProps {
   email: string;
   expiredItemsCount: number;
   onPurgeExpired: () => void;
   onLogout: () => void;
 }
-
 const HeaderBar: React.FC<HeaderBarProps> = ({
   email,
   expiredItemsCount,
   onPurgeExpired,
   onLogout
-}) => (
-  <div className="flex items-center justify-between mb-8">
+}) => <div className="flex items-center justify-between mb-8 py-[20px]">
     {/* Branding */}
     <div className="flex items-center gap-3">
       <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 dark:from-[#34d399] dark:to-green-700 rounded-xl shadow-lg">
@@ -35,27 +31,14 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
         <p className="text-sm font-medium text-gray-700 dark:text-black">{email}</p>
         <p className="text-xs text-gray-500 dark:text-black">Welcome!</p>
       </div>
-      {expiredItemsCount > 0 && (
-        <Button
-          onClick={onPurgeExpired}
-          variant="destructive"
-          className="shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-red-700 bg-red-700 text-white"
-        >
+      {expiredItemsCount > 0 && <Button onClick={onPurgeExpired} variant="destructive" className="shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-red-700 bg-red-700 text-white">
           <Trash2 className="w-4 h-4 mr-2" />
           Purge All Expired
-        </Button>
-      )}
-      <Button
-        variant="outline"
-        onClick={onLogout}
-        className="shadow-lg hover:shadow-xl transition-all duration-300 ml-6"
-      >
+        </Button>}
+      <Button variant="outline" onClick={onLogout} className="shadow-lg hover:shadow-xl transition-all duration-300 ml-6">
         <LogOut className="w-4 h-4 mr-2" />
         Logout
       </Button>
     </div>
-  </div>
-);
-
+  </div>;
 export default HeaderBar;
-
