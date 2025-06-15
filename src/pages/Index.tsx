@@ -9,49 +9,79 @@ import SmartQuery from '@/components/SmartQuery';
 import { FridgeItem } from '@/types/FridgeItem';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Plus, Refrigerator, Trash2 } from 'lucide-react';
+import { Plus, Refrigerator, Trash2, LogOut } from 'lucide-react';
 import { ParsedFoodItem } from '@/services/geminiService';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import type { Session } from '@supabase/supabase-js';
 
 const Index = () => {
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<FridgeItem[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        setLoading(false);
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!loading && !session) {
+      navigate('/auth');
+    }
+  }, [session, loading, navigate]);
 
   // Mock initial data
   useEffect(() => {
-    const mockItems: FridgeItem[] = [
-      {
-        id: '1',
-        name: 'Organic Milk',
-        category: 'dairy',
-        openDate: new Date('2025-05-25'),
-        printedExpiry: new Date('2025-05-30'),
-        predictedExpiry: new Date('2025-05-28'),
-        status: 'warning',
-        notificationSent: false
-      },
-      {
-        id: '2',
-        name: 'Greek Yogurt',
-        category: 'dairy',
-        openDate: new Date('2025-05-20'),
-        printedExpiry: new Date('2025-06-05'),
-        predictedExpiry: new Date('2025-06-03'),
-        status: 'fresh',
-        notificationSent: false
-      },
-      {
-        id: '3',
-        name: 'Baby Spinach',
-        category: 'vegetables',
-        openDate: new Date('2025-05-26'),
-        printedExpiry: new Date('2025-05-29'),
-        predictedExpiry: new Date('2025-05-27'),
-        status: 'critical',
-        notificationSent: false
-      }
-    ];
-    setItems(mockItems);
-  }, []);
+    if (session) {
+      const mockItems: FridgeItem[] = [
+        {
+          id: '1',
+          name: 'Organic Milk',
+          category: 'dairy',
+          openDate: new Date('2025-05-25'),
+          printedExpiry: new Date('2025-05-30'),
+          predictedExpiry: new Date('2025-05-28'),
+          status: 'warning',
+          notificationSent: false
+        },
+        {
+          id: '2',
+          name: 'Greek Yogurt',
+          category: 'dairy',
+          openDate: new Date('2025-05-20'),
+          printedExpiry: new Date('2025-06-05'),
+          predictedExpiry: new Date('2025-06-03'),
+          status: 'fresh',
+          notificationSent: false
+        },
+        {
+          id: '3',
+          name: 'Baby Spinach',
+          category: 'vegetables',
+          openDate: new Date('2025-05-26'),
+          printedExpiry: new Date('2025-05-29'),
+          predictedExpiry: new Date('2025-05-27'),
+          status: 'critical',
+          notificationSent: false
+        }
+      ];
+      setItems(mockItems);
+    }
+  }, [session]);
 
   const addItem = (newItem: Omit<FridgeItem, 'id' | 'status'>) => {
     const item: FridgeItem = {
@@ -114,6 +144,21 @@ const Index = () => {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
+  const handleLogout = async () => {
+    setLoading(true);
+    await supabase.auth.signOut();
+    toast.success('Logged out successfully');
+    navigate('/auth');
+  };
+
+  if (loading || !session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    );
+  }
+
   const expiringItems = items.filter(item => item.status === 'critical' || item.status === 'warning');
   const expiredItemsCount = items.filter(item => {
     const today = new Date();
@@ -137,7 +182,11 @@ const Index = () => {
               <p className="text-gray-600">AI-powered expiry tracking and waste reduction</p>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-medium text-gray-700">{session.user.email}</p>
+              <p className="text-xs text-gray-500">Welcome!</p>
+            </div>
             {expiredItemsCount > 0 && (
               <Button 
                 onClick={removeExpiredItems}
@@ -154,6 +203,10 @@ const Index = () => {
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Item
+            </Button>
+            <Button variant="outline" onClick={handleLogout} className="shadow-lg hover:shadow-xl transition-all duration-300">
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
             </Button>
           </div>
         </div>
