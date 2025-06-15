@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import ThemeToggle from '@/components/ThemeToggle';
 import { Plus, Refrigerator, Trash2, LogOut } from 'lucide-react';
 
 interface HeaderBarProps {
@@ -33,7 +32,6 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
     </div>
     {/* Actions */}
     <div className="flex items-center gap-3">
-      <ThemeToggle />
       <div className="text-right hidden sm:block">
         <p className="text-sm font-medium text-gray-700 dark:text-black">{email}</p>
         <p className="text-xs text-gray-500 dark:text-black">Welcome!</p>

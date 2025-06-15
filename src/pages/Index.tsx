@@ -14,7 +14,6 @@ import { ParsedFoodItem } from '@/services/geminiService';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
-import ThemeToggle from '@/components/ThemeToggle';
 import HeaderBar from '@/components/HeaderBar';
 import FridgeStatsCards from '@/components/FridgeStatsCards';
 
