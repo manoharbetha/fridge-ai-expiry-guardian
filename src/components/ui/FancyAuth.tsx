@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Eye, EyeOff, Github, Twitter, Linkedin, Mail, Lock, User } from "lucide-react";
 
@@ -92,7 +91,6 @@ const AnimatedFormField: React.FC<FormFieldProps> = ({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className="w-full bg-transparent pl-10 pr-12 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none"
-          placeholder=""
         />
 
         <label
