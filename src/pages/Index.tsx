@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import ItemDashboard from '@/components/ItemDashboard';
@@ -159,13 +158,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Smart Input Feature - TOP PRIORITY */}
-        <div className="mb-8">
-          <div className="max-w-2xl mx-auto">
-            <NaturalLanguageInput onItemsParsed={addItemsFromAI} />
-          </div>
-        </div>
-
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
@@ -196,29 +188,20 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* Left Column - Items Dashboard */}
-          <div className="lg:col-span-2">
+        {/* Main Content Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          {/* Main Column */}
+          <div className="lg:col-span-3 space-y-8">
             <ItemDashboard items={items} onRemoveItem={removeItem} />
+            <RecipeRecommendations items={items} />
           </div>
 
-          {/* Right Column - Notifications */}
-          <div>
+          {/* Side Column (AI & Notifications) */}
+          <div className="lg:col-span-2 space-y-8">
+            <NaturalLanguageInput onItemsParsed={addItemsFromAI} />
+            <SmartQuery items={items} />
             <NotificationPanel items={expiringItems} />
           </div>
-        </div>
-
-        {/* AI Query Section */}
-        <div className="mb-8">
-          <div className="max-w-2xl mx-auto">
-            <SmartQuery items={items} />
-          </div>
-        </div>
-
-        {/* Recipe Recommendations - BOTTOM PRIORITY */}
-        <div className="max-w-4xl mx-auto">
-          <RecipeRecommendations items={items} />
         </div>
 
         {/* Add Item Modal */}
