@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import HeroSection from '@/components/ui/HeroSection';
 import { toast } from 'sonner';
 import ItemDashboard from '@/components/ItemDashboard';
 import AddItemForm from '@/components/AddItemForm';
@@ -229,6 +230,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 
       dark:from-[#283e51] dark:via-[#485563] dark:to-[#232526] transition-colors dark:text-black">
+      {/* --- HERO SECTION AT TOP --- */}
+      <HeroSection />
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <HeaderBar
