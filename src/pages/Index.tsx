@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import ItemDashboard from '@/components/ItemDashboard';
@@ -15,12 +16,42 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 
+// Utility: Convert db row to FridgeItem (dates as Date objects, status normalized)
+function parseDbFridgeItem(row: any): FridgeItem {
+  return {
+    id: row.id,
+    name: row.name,
+    category: row.category,
+    openDate: row.open_date ? new Date(row.open_date) : new Date(),
+    printedExpiry: row.printed_expiry ? new Date(row.printed_expiry) : new Date(),
+    predictedExpiry: row.predicted_expiry ? new Date(row.predicted_expiry) : new Date(),
+    status: typeof row.status === 'string' && ['fresh', 'warning', 'critical', 'expired'].includes(row.status) ? row.status : 'fresh',
+    notificationSent: !!row.notification_sent,
+  };
+}
+
+// Utility: Convert FridgeItem to db insert/update row
+function fridgeItemToDbRow(item: Omit<FridgeItem, 'id' | 'status'> & {status:string}, userId: string) {
+  return {
+    name: item.name,
+    category: item.category,
+    open_date: item.openDate.toISOString().slice(0, 10),
+    printed_expiry: item.printedExpiry.toISOString().slice(0, 10),
+    predicted_expiry: item.predictedExpiry.toISOString().slice(0, 10),
+    status: item.status,
+    notification_sent: item.notificationSent,
+    user_id: userId,
+    expiry_date: item.predictedExpiry.toISOString().slice(0, 10), // for legacy/support
+  };
+}
+
 const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<FridgeItem[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const navigate = useNavigate();
+  const [itemsLoading, setItemsLoading] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -29,12 +60,10 @@ const Index = () => {
         setLoading(false);
       }
     );
-
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -44,63 +73,66 @@ const Index = () => {
     }
   }, [session, loading, navigate]);
 
-  // Mock initial data
+  // Load user's items from Supabase
   useEffect(() => {
-    if (session) {
-      const mockItems: FridgeItem[] = [
-        {
-          id: '1',
-          name: 'Organic Milk',
-          category: 'dairy',
-          openDate: new Date('2025-05-25'),
-          printedExpiry: new Date('2025-05-30'),
-          predictedExpiry: new Date('2025-05-28'),
-          status: 'warning',
-          notificationSent: false
-        },
-        {
-          id: '2',
-          name: 'Greek Yogurt',
-          category: 'dairy',
-          openDate: new Date('2025-05-20'),
-          printedExpiry: new Date('2025-06-05'),
-          predictedExpiry: new Date('2025-06-03'),
-          status: 'fresh',
-          notificationSent: false
-        },
-        {
-          id: '3',
-          name: 'Baby Spinach',
-          category: 'vegetables',
-          openDate: new Date('2025-05-26'),
-          printedExpiry: new Date('2025-05-29'),
-          predictedExpiry: new Date('2025-05-27'),
-          status: 'critical',
-          notificationSent: false
-        }
-      ];
-      setItems(mockItems);
+    if (session?.user) {
+      setItemsLoading(true);
+      supabase
+        .from('food_items')
+        .select('*')
+        .order('predicted_expiry', { ascending: true })
+        .then(({ data, error }) => {
+          if (error) {
+            toast.error('Could not load fridge items.');
+            setItems([]);
+          } else if (data) {
+            setItems(data.map(parseDbFridgeItem));
+          }
+        })
+        .finally(() => setItemsLoading(false));
     }
-  }, [session]);
+  }, [session?.user]);
 
-  const addItem = (newItem: Omit<FridgeItem, 'id' | 'status'>) => {
-    const item: FridgeItem = {
-      ...newItem,
-      id: Date.now().toString(),
-      status: getDaysUntilExpiry(newItem.predictedExpiry) <= 2 ? 'critical' : 
-             getDaysUntilExpiry(newItem.predictedExpiry) <= 5 ? 'warning' : 'fresh'
-    };
-    setItems(prev => [...prev, item]);
-    setShowAddForm(false);
-    toast.success('Item added to your fridge!');
+  // Helper for expiry status
+  const getDaysUntilExpiry = (date: Date) => {
+    const today = new Date();
+    const diffTime = date.getTime() - today.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+  const getStatusFromPredicted = (predictedExpiryDate: Date) => {
+    const days = getDaysUntilExpiry(predictedExpiryDate);
+    if (days < 0) return 'expired';
+    if (days <= 2) return 'critical';
+    if (days <= 5) return 'warning';
+    return 'fresh';
   };
 
-  const addItemsFromAI = (parsedItems: ParsedFoodItem[]) => {
+  // Add a single item to Supabase
+  const addItem = async (newItem: Omit<FridgeItem, 'id' | 'status'>) => {
+    if (!session?.user) return;
+    const status = getStatusFromPredicted(newItem.predictedExpiry);
+    const dbRow = fridgeItemToDbRow({ ...newItem, status }, session.user.id);
+    const { data, error } = await supabase
+      .from('food_items')
+      .insert([dbRow])
+      .select()
+      .maybeSingle();
+    if (error) {
+      toast.error('Error adding item.');
+    } else if (data) {
+      setItems(prev => [...prev, parseDbFridgeItem(data)]);
+      setShowAddForm(false);
+      toast.success('Item added to your fridge!');
+    }
+  };
+
+  // Add multiple items (from AI) to Supabase
+  const addItemsFromAI = async (parsedItems: ParsedFoodItem[]) => {
+    if (!session?.user) return;
     const today = new Date();
     const defaultExpiry = new Date();
     defaultExpiry.setDate(today.getDate() + 7); // Default 1 week expiry
-    
-    parsedItems.forEach(parsedItem => {
+    for (const parsedItem of parsedItems) {
       const newItem: Omit<FridgeItem, 'id' | 'status'> = {
         name: parsedItem.name,
         category: parsedItem.category,
@@ -109,39 +141,40 @@ const Index = () => {
         predictedExpiry: defaultExpiry,
         notificationSent: false
       };
-      addItem(newItem);
-    });
+      await addItem(newItem);
+    }
   };
 
-  const removeItem = (id: string) => {
-    setItems(prev => prev.filter(item => item.id !== id));
-    toast.success('Item removed from fridge');
+  // Remove item from Supabase
+  const removeItem = async (id: string) => {
+    const { error } = await supabase.from('food_items').delete().eq('id', id);
+    if (error) {
+      toast.error('Error removing item.');
+    } else {
+      setItems(prev => prev.filter(item => item.id !== id));
+      toast.success('Item removed from fridge');
+    }
   };
 
-  const removeExpiredItems = () => {
+  // Remove expired items from Supabase
+  const removeExpiredItems = async () => {
     const today = new Date();
     const expiredItems = items.filter(item => {
       const expiryDate = new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime()));
       return expiryDate < today;
     });
-    
     if (expiredItems.length === 0) {
       toast.info('No expired items to remove');
       return;
     }
-    
-    setItems(prev => prev.filter(item => {
-      const expiryDate = new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime()));
-      return expiryDate >= today;
-    }));
-    
-    toast.success(`Removed ${expiredItems.length} expired item(s)`);
-  };
-
-  const getDaysUntilExpiry = (date: Date) => {
-    const today = new Date();
-    const diffTime = date.getTime() - today.getTime();
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const expiredIds = expiredItems.map(item => item.id);
+    const { error } = await supabase.from('food_items').delete().in('id', expiredIds);
+    if (error) {
+      toast.error('Failed to remove expired items');
+    } else {
+      setItems(prev => prev.filter(item => !expiredIds.includes(item.id)));
+      toast.success(`Removed ${expiredItems.length} expired item(s)`);
+    }
   };
 
   const handleLogout = async () => {
@@ -248,6 +281,13 @@ const Index = () => {
           <NotificationPanel items={expiringItems} />
           <ItemDashboard items={items} onRemoveItem={removeItem} />
           <RecipeRecommendations items={items} />
+          {itemsLoading && (
+            <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-8 shadow-lg text-center text-lg">
+                Loading your fridge items...
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Add Item Modal */}

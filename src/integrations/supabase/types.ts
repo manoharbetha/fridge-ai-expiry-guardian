@@ -18,7 +18,12 @@ export type Database = {
           expiry_date: string
           id: string
           name: string
+          notification_sent: boolean | null
+          open_date: string | null
+          predicted_expiry: string | null
+          printed_expiry: string | null
           quantity: number
+          status: string | null
           unit: string
           updated_at: string
           user_id: string
@@ -31,7 +36,12 @@ export type Database = {
           expiry_date: string
           id?: string
           name: string
+          notification_sent?: boolean | null
+          open_date?: string | null
+          predicted_expiry?: string | null
+          printed_expiry?: string | null
           quantity?: number
+          status?: string | null
           unit?: string
           updated_at?: string
           user_id: string
@@ -44,7 +54,12 @@ export type Database = {
           expiry_date?: string
           id?: string
           name?: string
+          notification_sent?: boolean | null
+          open_date?: string | null
+          predicted_expiry?: string | null
+          printed_expiry?: string | null
           quantity?: number
+          status?: string | null
           unit?: string
           updated_at?: string
           user_id?: string
