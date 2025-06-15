@@ -43,7 +43,8 @@ const Auth = () => {
         setError(err.message);
         toast.error(err.message);
       } else {
-        toast.info("Check your email for the confirmation link.");
+        toast.success("Account created! You can now log in.");
+        setMode("login");
       }
     }
     setLoading(false);
