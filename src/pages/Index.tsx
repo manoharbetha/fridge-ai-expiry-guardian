@@ -235,7 +235,6 @@ const Index = () => {
         email={session.user.email}
         expiredItemsCount={expiredItemsCount}
         onPurgeExpired={purgeExpiredItems}
-        onAddItem={() => setShowAddForm(true)}
         onLogout={handleLogout}
       />
       {/* --- HERO SECTION BELOW HEADER --- */}
@@ -251,7 +250,22 @@ const Index = () => {
 
         {/* Main Content Layout */}
         <div className="space-y-8">
-          <NaturalLanguageInput onItemsParsed={addItemsFromAI} />
+          {/* Flex row for SmartInput and Add Items Manually Button */}
+          <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
+            <div className="flex-1">
+              <NaturalLanguageInput onItemsParsed={addItemsFromAI} />
+            </div>
+            <div className="sm:w-auto">
+              <Button
+                type="button"
+                onClick={() => setShowAddForm(true)}
+                className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 dark:from-[#34d399] dark:to-green-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Items Manually
+              </Button>
+            </div>
+          </div>
           <SmartQuery items={items} />
           <NotificationPanel items={expiringItems} />
           <ItemDashboard items={items} onRemoveItem={removeItem} />
@@ -264,7 +278,6 @@ const Index = () => {
             </div>
           )}
         </div>
-
         {/* Add Item Modal */}
         {showAddForm && (
           <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">

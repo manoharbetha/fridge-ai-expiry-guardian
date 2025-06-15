@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Refrigerator, Trash2, LogOut } from 'lucide-react';
@@ -14,7 +15,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   email,
   expiredItemsCount,
   onPurgeExpired,
-  onAddItem,
+  // onAddItem, // Removed the add item button from the header
   onLogout
 }) => (
   <div className="flex items-center justify-between mb-8">
@@ -46,13 +47,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
           Purge All Expired
         </Button>
       )}
-      <Button
-        onClick={onAddItem}
-        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 dark:from-[#34d399] dark:to-green-700"
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        Add Item
-      </Button>
+      {/* Removed ADD ITEM Button */}
       <Button
         variant="outline"
         onClick={onLogout}
@@ -66,3 +61,4 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
 );
 
 export default HeaderBar;
+
