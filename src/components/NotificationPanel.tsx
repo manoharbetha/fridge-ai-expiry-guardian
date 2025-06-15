@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FridgeItem } from '@/types/FridgeItem';
 import { Card } from '@/components/ui/card';
@@ -37,7 +36,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ items }) => {
                   <div className="text-sm text-red-600">
                     Expires {formatDistanceToNow(new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime())), { addSuffix: true })}
                   </div>
-                  <Badge className="bg-red-100 text-red-800 border-red-200 text-xs mt-1">
+                  <Badge className="bg-red-100 text-red-800 border-red-200 text-xs mt-1 transition-colors hover:bg-red-200">
                     Critical
                   </Badge>
                 </div>
@@ -52,7 +51,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ items }) => {
                   <div className="text-sm text-amber-600">
                     Expires {formatDistanceToNow(new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime())), { addSuffix: true })}
                   </div>
-                  <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-xs mt-1">
+                  <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-xs mt-1 transition-colors hover:bg-amber-200">
                     Warning
                   </Badge>
                 </div>
