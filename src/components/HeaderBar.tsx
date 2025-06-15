@@ -14,7 +14,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   onLogout
 }) => <div className="flex items-center justify-between mb-8 py-[20px]">
     {/* Branding */}
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 py-[5px] px-[9px]">
       <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 dark:from-[#34d399] dark:to-green-700 rounded-xl shadow-lg">
         <Refrigerator className="w-8 h-8 text-white dark:text-black" />
       </div>
