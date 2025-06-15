@@ -22,7 +22,13 @@ const RecipeDragDrop: React.FC<RecipeDragDropProps> = ({
   const unselectedItems = items.filter((item) => !selected.includes(item.id));
   const selectedItems = items.filter((item) => selected.includes(item.id));
 
-  const handleDragStart = (id: string) => setDraggedId(id);
+  // --- DRAG HELPERS ---
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
+    setDraggedId(id);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", id);
+  };
+
   const handleDragEnd = () => setDraggedId(null);
 
   const handleDropToSelected = (id: string) => {
@@ -58,8 +64,8 @@ const RecipeDragDrop: React.FC<RecipeDragDropProps> = ({
                 ${draggedId === item.id ? "opacity-50" : ""}
                 hover:bg-emerald-50 transition-colors`}
               draggable
-              onDragStart={() => handleDragStart(item.id)}
-              onDragEnd={() => handleDragEnd()}
+              onDragStart={(e) => handleDragStart(e, item.id)}
+              onDragEnd={handleDragEnd}
               onDoubleClick={() => handleDropToSelected(item.id)}
               title="Drag or double-click to select"
             >
@@ -75,7 +81,7 @@ const RecipeDragDrop: React.FC<RecipeDragDropProps> = ({
         onDragOver={e => e.preventDefault()}
         onDrop={e => {
           const id = e.dataTransfer.getData("text/plain");
-          // Only drop if not already selected
+          // Only drop if not already selected and item exists
           if (!selected.includes(id) && items.find(i => i.id === id)) {
             handleDropToSelected(id);
           }
@@ -94,8 +100,8 @@ const RecipeDragDrop: React.FC<RecipeDragDropProps> = ({
                 ${draggedId === item.id ? "opacity-50" : ""}
                 hover:bg-green-100 transition-colors`}
               draggable
-              onDragStart={() => handleDragStart(item.id)}
-              onDragEnd={() => handleDragEnd()}
+              onDragStart={(e) => handleDragStart(e, item.id)}
+              onDragEnd={handleDragEnd}
               onDoubleClick={() => handleDropToUnselected(item.id)}
               title="Drag or double-click to remove"
             >
