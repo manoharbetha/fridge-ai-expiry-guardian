@@ -71,6 +71,8 @@ const AnimatedFormField: React.FC<FormFieldProps> = ({
     });
   };
 
+  const floatLabel = isFocused || (typeof value === "string" && value.length > 0);
+
   return (
     <div className="relative group">
       <div
@@ -90,16 +92,16 @@ const AnimatedFormField: React.FC<FormFieldProps> = ({
           autoComplete={autoComplete}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className="w-full bg-transparent pl-10 pr-12 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none"
+          className="w-full bg-transparent pl-10 pr-12 py-3 text-foreground placeholder-transparent focus:outline-none"
         />
 
         <label
-          className={`absolute left-10 transition-all duration-200 ease-in-out pointer-events-none bg-transparent
-            ${
-              isFocused || (typeof value === "string" && value.length > 0)
-                ? "top-2 text-xs text-primary font-medium"
-                : "top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
-            }`}
+          className={[
+            "absolute left-10 pointer-events-none bg-transparent transition-all duration-200 ease-in-out",
+            floatLabel
+              ? "top-2 text-xs text-primary font-medium"
+              : "top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+          ].join(" ")}
         >
           {placeholder}
         </label>
