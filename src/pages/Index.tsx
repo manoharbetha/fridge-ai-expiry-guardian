@@ -15,6 +15,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import ThemeToggle from '@/components/ThemeToggle';
+import HeaderBar from '@/components/HeaderBar';
+import FridgeStatsCards from '@/components/FridgeStatsCards';
 
 // Utility: Convert db row to FridgeItem (dates as Date objects, status normalized)
 function parseDbFridgeItem(row: any): FridgeItem {
@@ -201,83 +203,28 @@ const Index = () => {
     const expiryDate = new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime()));
     return expiryDate < today;
   }).length;
+  const freshItemsCount = items.filter(item => item.status === 'fresh').length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 
-      dark:from-[#274046] dark:via-[#202537] dark:to-[#4e4376] transition-colors dark:text-black">
+      dark:from-[#283e51] dark:via-[#485563] dark:to-[#232526] transition-colors dark:text-black">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 dark:from-[#34d399] dark:to-green-700 rounded-xl shadow-lg">
-              <Refrigerator className="w-8 h-8 text-white dark:text-black" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent dark:from-teal-200 dark:to-green-300 dark:bg-clip-text dark:text-black">
-                Smart Fridge Manager
-              </h1>
-              <p className="text-gray-600 dark:text-black">AI-powered expiry tracking and waste reduction</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-gray-700 dark:text-black">{session.user.email}</p>
-              <p className="text-xs text-gray-500 dark:text-black">Welcome!</p>
-            </div>
-            {expiredItemsCount > 0 && (
-              <Button 
-                onClick={removeExpiredItems}
-                variant="destructive"
-                className="shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Remove Expired ({expiredItemsCount})
-              </Button>
-            )}
-            <Button 
-              onClick={() => setShowAddForm(true)}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 dark:from-[#34d399] dark:to-green-700"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Item
-            </Button>
-            <Button variant="outline" onClick={handleLogout} className="shadow-lg hover:shadow-xl transition-all duration-300">
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
+        <HeaderBar
+          email={session.user.email}
+          expiredItemsCount={expiredItemsCount}
+          onRemoveExpired={removeExpiredItems}
+          onAddItem={() => setShowAddForm(true)}
+          onLogout={handleLogout}
+        />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 bg-white/80 dark:bg-[#112417]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 dark:text-black">{items.length}</div>
-              <div className="text-gray-600 dark:text-black">Total Items</div>
-            </div>
-          </Card>
-          <Card className="p-6 bg-white/80 dark:bg-[#16291f]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-amber-600 dark:text-black">{expiringItems.length}</div>
-              <div className="text-gray-600 dark:text-black">Expiring Soon</div>
-            </div>
-          </Card>
-          <Card className="p-6 bg-white/80 dark:bg-[#16312c]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 dark:text-black">
-                {items.filter(item => item.status === 'fresh').length}
-              </div>
-              <div className="text-gray-600 dark:text-black">Fresh Items</div>
-            </div>
-          </Card>
-          <Card className="p-6 bg-white/80 dark:bg-[#1d2429]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-red-600 dark:text-black">{expiredItemsCount}</div>
-              <div className="text-gray-600 dark:text-black">Expired Items</div>
-            </div>
-          </Card>
-        </div>
+        <FridgeStatsCards
+          total={items.length}
+          expiring={expiringItems.length}
+          fresh={freshItemsCount}
+          expired={expiredItemsCount}
+        />
 
         {/* Main Content Layout */}
         <div className="space-y-8">
