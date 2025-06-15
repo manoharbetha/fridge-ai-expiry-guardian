@@ -19,7 +19,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
         <Refrigerator className="w-8 h-8 text-white dark:text-black" />
       </div>
       <div>
-        <h1 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent dark:from-teal-200 dark:to-green-300 dark:bg-clip-text dark:text-black">
+        <h1 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent dark:from-teal-200 dark:to-green-300 dark:bg-clip-text dark:text-black py-0 my-[4px]">
           Smart Fridge Manager
         </h1>
         <p className="text-gray-600 dark:text-black">AI-powered expiry tracking and waste reduction</p>
