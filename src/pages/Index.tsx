@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import ItemDashboard from '@/components/ItemDashboard';
@@ -77,19 +76,22 @@ const Index = () => {
   useEffect(() => {
     if (session?.user) {
       setItemsLoading(true);
-      supabase
-        .from('food_items')
-        .select('*')
-        .order('predicted_expiry', { ascending: true })
-        .then(({ data, error }) => {
+      (async () => {
+        try {
+          const { data, error } = await supabase
+            .from('food_items')
+            .select('*')
+            .order('predicted_expiry', { ascending: true });
           if (error) {
             toast.error('Could not load fridge items.');
             setItems([]);
           } else if (data) {
             setItems(data.map(parseDbFridgeItem));
           }
-        })
-        .finally(() => setItemsLoading(false));
+        } finally {
+          setItemsLoading(false);
+        }
+      })();
     }
   }, [session?.user]);
 
