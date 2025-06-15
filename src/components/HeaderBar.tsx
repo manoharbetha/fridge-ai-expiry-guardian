@@ -7,7 +7,6 @@ interface HeaderBarProps {
   email: string;
   expiredItemsCount: number;
   onPurgeExpired: () => void;
-  onAddItem: () => void;
   onLogout: () => void;
 }
 
@@ -15,7 +14,6 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   email,
   expiredItemsCount,
   onPurgeExpired,
-  // onAddItem, // Removed the add item button from the header
   onLogout
 }) => (
   <div className="flex items-center justify-between mb-8">
@@ -47,7 +45,6 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
           Purge All Expired
         </Button>
       )}
-      {/* Removed ADD ITEM Button */}
       <Button
         variant="outline"
         onClick={onLogout}
