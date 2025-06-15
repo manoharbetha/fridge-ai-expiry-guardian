@@ -230,17 +230,17 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 
       dark:from-[#283e51] dark:via-[#485563] dark:to-[#232526] transition-colors dark:text-black">
-      {/* --- HERO SECTION AT TOP --- */}
+      {/* --- HEADERBAR AT TOP --- */}
+      <HeaderBar
+        email={session.user.email}
+        expiredItemsCount={expiredItemsCount}
+        onPurgeExpired={purgeExpiredItems}
+        onAddItem={() => setShowAddForm(true)}
+        onLogout={handleLogout}
+      />
+      {/* --- HERO SECTION BELOW HEADER --- */}
       <HeroSection />
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <HeaderBar
-          email={session.user.email}
-          expiredItemsCount={expiredItemsCount}
-          onPurgeExpired={purgeExpiredItems}
-          onAddItem={() => setShowAddForm(true)}
-          onLogout={handleLogout}
-        />
         {/* Stats Cards */}
         <FridgeStatsCards
           total={items.length}
