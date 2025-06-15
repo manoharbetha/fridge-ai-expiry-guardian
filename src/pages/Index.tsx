@@ -204,26 +204,26 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 
-      dark:from-[#274046] dark:via-[#202537] dark:to-[#4e4376] transition-colors">
+      dark:from-[#274046] dark:via-[#202537] dark:to-[#4e4376] transition-colors dark:text-black">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 dark:from-[#34d399] dark:to-green-700 rounded-xl shadow-lg">
-              <Refrigerator className="w-8 h-8 text-white dark:text-gray-900" />
+              <Refrigerator className="w-8 h-8 text-white dark:text-black" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent dark:from-teal-200 dark:to-green-300 dark:bg-clip-text">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent dark:from-teal-200 dark:to-green-300 dark:bg-clip-text dark:text-black">
                 Smart Fridge Manager
               </h1>
-              <p className="text-gray-600 dark:text-gray-300">AI-powered expiry tracking and waste reduction</p>
+              <p className="text-gray-600 dark:text-black">AI-powered expiry tracking and waste reduction</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{session.user.email}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Welcome!</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-black">{session.user.email}</p>
+              <p className="text-xs text-gray-500 dark:text-black">Welcome!</p>
             </div>
             {expiredItemsCount > 0 && (
               <Button 
@@ -253,28 +253,28 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="p-6 bg-white/80 dark:bg-[#112417]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 dark:text-green-300">{items.length}</div>
-              <div className="text-gray-600 dark:text-gray-300">Total Items</div>
+              <div className="text-3xl font-bold text-green-600 dark:text-black">{items.length}</div>
+              <div className="text-gray-600 dark:text-black">Total Items</div>
             </div>
           </Card>
           <Card className="p-6 bg-white/80 dark:bg-[#16291f]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="text-center">
-              <div className="text-3xl font-bold text-amber-600 dark:text-yellow-400">{expiringItems.length}</div>
-              <div className="text-gray-600 dark:text-gray-300">Expiring Soon</div>
+              <div className="text-3xl font-bold text-amber-600 dark:text-black">{expiringItems.length}</div>
+              <div className="text-gray-600 dark:text-black">Expiring Soon</div>
             </div>
           </Card>
           <Card className="p-6 bg-white/80 dark:bg-[#16312c]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 dark:text-blue-300">
+              <div className="text-3xl font-bold text-blue-600 dark:text-black">
                 {items.filter(item => item.status === 'fresh').length}
               </div>
-              <div className="text-gray-600 dark:text-gray-300">Fresh Items</div>
+              <div className="text-gray-600 dark:text-black">Fresh Items</div>
             </div>
           </Card>
           <Card className="p-6 bg-white/80 dark:bg-[#1d2429]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="text-center">
-              <div className="text-3xl font-bold text-red-600 dark:text-red-400">{expiredItemsCount}</div>
-              <div className="text-gray-600 dark:text-gray-300">Expired Items</div>
+              <div className="text-3xl font-bold text-red-600 dark:text-black">{expiredItemsCount}</div>
+              <div className="text-gray-600 dark:text-black">Expired Items</div>
             </div>
           </Card>
         </div>
@@ -288,7 +288,7 @@ const Index = () => {
           <RecipeRecommendations items={items} />
           {itemsLoading && (
             <div className="fixed inset-0 bg-black/20 dark:bg-black/40 flex items-center justify-center z-50">
-              <div className="bg-white dark:bg-background rounded-lg p-8 shadow-lg text-center text-lg dark:text-gray-200">
+              <div className="bg-white dark:bg-background rounded-lg p-8 shadow-lg text-center text-lg dark:text-black">
                 Loading your fridge items...
               </div>
             </div>
