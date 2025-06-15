@@ -94,11 +94,12 @@ const AnimatedFormField: React.FC<FormFieldProps> = ({
         />
 
         <label
-          className={`absolute left-10 transition-all duration-200 ease-in-out pointer-events-none ${
-            isFocused || value
-              ? "top-2 text-xs text-primary font-medium"
-              : "top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
-          }`}
+          className={`absolute left-10 transition-all duration-200 ease-in-out pointer-events-none bg-transparent
+            ${
+              isFocused || (typeof value === "string" && value.length > 0)
+                ? "top-2 text-xs text-primary font-medium"
+                : "top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+            }`}
         >
           {placeholder}
         </label>
