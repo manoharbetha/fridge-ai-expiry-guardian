@@ -74,7 +74,7 @@ const AnimatedFormField: React.FC<FormFieldProps> = ({
   const floatLabel = isFocused || (typeof value === "string" && value.length > 0);
 
   return (
-    <div className="relative group">
+    <div className="relative group my-1">
       <div
         className="relative overflow-hidden rounded-lg border border-border bg-background transition-all duration-300 ease-in-out"
         onMouseMove={handleMouseMove}
@@ -92,7 +92,8 @@ const AnimatedFormField: React.FC<FormFieldProps> = ({
           autoComplete={autoComplete}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className="w-full bg-transparent pl-10 pr-12 py-3 text-foreground placeholder-transparent focus:outline-none"
+          // Added pt-6 to provide room for floating label!
+          className="w-full bg-transparent pl-10 pr-12 py-3 pt-6 text-foreground placeholder-transparent focus:outline-none"
         />
 
         <label
@@ -102,6 +103,12 @@ const AnimatedFormField: React.FC<FormFieldProps> = ({
               ? "top-2 text-xs text-primary font-medium opacity-100 translate-y-0"
               : "top-1/2 -translate-y-1/2 text-sm text-muted-foreground opacity-80"
           ].join(" ")}
+          style={{
+            // Give a minimal background to mask text under the label
+            background: "inherit",
+            padding: floatLabel ? "0 0.25rem" : undefined,
+            zIndex: 10,
+          }}
         >
           {placeholder}
         </label>
@@ -296,22 +303,6 @@ export const FancyAuth: React.FC<FancyAuthProps> = ({ mode, loading, onSubmit, e
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
             </button>
           </form>
-          <div className="mt-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-card text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-            <div className="mt-6 grid grid-cols-3 gap-3">
-              <SocialButton icon={<Github size={20} />} name="GitHub" />
-              <SocialButton icon={<Twitter size={20} />} name="Twitter" />
-              <SocialButton icon={<Linkedin size={20} />} name="LinkedIn" />
-            </div>
-            {/* Social buttons are UI only, add handlers if you want OAuth */}
-          </div>
           <div className="mt-8 text-center">
             <p className="text-sm text-muted-foreground">
               {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
