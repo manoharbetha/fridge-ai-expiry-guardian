@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { TextRotate } from "@/components/ui/text-rotate";
@@ -35,21 +34,6 @@ export default function HeroSection() {
         <p className="text-emerald-800/70 max-w-lg mx-auto">
           Effortlessly track expiry dates, cut food waste, and get AI-powered recipe recommendations based on your fridge contents.
         </p>
-        {/* Smooth animated button */}
-        <motion.div
-          initial={{ scale: 1 }}
-          whileHover={{ scale: 1.13, rotate: -2 }}
-          whileTap={{ scale: 0.94, rotate: 1 }}
-          transition={{ type: "spring", stiffness: 230, damping: 17 }}
-        >
-          <Button
-            size="lg"
-            className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 shadow-xl text-lg font-semibold px-8 py-4 transition-transform duration-150"
-            onClick={() => window.location.href = "/auth"}
-          >
-            Get Started Now
-          </Button>
-        </motion.div>
       </div>
     </section>
   );
