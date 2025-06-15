@@ -235,12 +235,10 @@ const Index = () => {
         <HeaderBar
           email={session.user.email}
           expiredItemsCount={expiredItemsCount}
-          onRemoveExpired={removeExpiredItems}
           onPurgeExpired={purgeExpiredItems}
           onAddItem={() => setShowAddForm(true)}
           onLogout={handleLogout}
         />
-
         {/* Stats Cards */}
         <FridgeStatsCards
           total={items.length}
