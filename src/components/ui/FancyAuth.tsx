@@ -99,8 +99,8 @@ const AnimatedFormField: React.FC<FormFieldProps> = ({
           className={[
             "absolute left-10 pointer-events-none bg-transparent transition-all duration-200 ease-in-out",
             floatLabel
-              ? "top-2 text-xs text-primary font-medium"
-              : "top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+              ? "top-2 text-xs text-primary font-medium opacity-100 translate-y-0"
+              : "top-1/2 -translate-y-1/2 text-sm text-muted-foreground opacity-80"
           ].join(" ")}
         >
           {placeholder}
