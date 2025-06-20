@@ -274,14 +274,6 @@ const Index = () => {
           <div id="recipes">
             <RecipeRecommendations items={items} />
           </div>
-          <div id="analytics">
-            <FridgeStatsCards
-              total={items.length}
-              expiring={expiringItems.length}
-              fresh={freshItemsCount}
-              expired={expiredItemsCount}
-            />
-          </div>
           {itemsLoading && (
             <div className="fixed inset-0 bg-black/20 dark:bg-black/40 flex items-center justify-center z-50">
               <div className="bg-white dark:bg-background rounded-lg p-8 shadow-lg text-center text-lg dark:text-black">

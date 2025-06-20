@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +14,8 @@ export interface GooeyNavProps {
   particleR?: number;
   timeVariance?: number;
   initialActiveIndex?: number;
+  onLogout?: () => void;
+  onPurgeExpired?: () => void;
 }
 
 export const GooeyNav: React.FC<GooeyNavProps> = ({
@@ -25,6 +26,8 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
   particleR = 100,
   timeVariance = 300,
   initialActiveIndex = 0,
+  onLogout,
+  onPurgeExpired,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLUListElement>(null);
@@ -154,7 +157,13 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
     }
 
     // Handle navigation
-    scrollToSection(item.href);
+    if (item.href === '#logout' && onLogout) {
+      onLogout();
+    } else if (item.href === '#purge' && onPurgeExpired) {
+      onPurgeExpired();
+    } else {
+      scrollToSection(item.href);
+    }
   };
 
   const handleLinkKeyDown = (
@@ -176,7 +185,13 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, index: number) => {
     e.preventDefault();
     const item = items[index];
-    scrollToSection(item.href);
+    if (item.href === '#logout' && onLogout) {
+      onLogout();
+    } else if (item.href === '#purge' && onPurgeExpired) {
+      onPurgeExpired();
+    } else {
+      scrollToSection(item.href);
+    }
   };
 
   useEffect(() => {

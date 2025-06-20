@@ -21,7 +21,8 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
     { label: "Dashboard", href: "/" },
     { label: "Items", href: "#items" },
     { label: "Recipes", href: "#recipes" },
-    { label: "Analytics", href: "#analytics" }
+    { label: "Logout", href: "#logout" },
+    { label: "Purge All", href: "#purge" }
   ];
 
   return (
@@ -49,6 +50,8 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
           particleR={80}
           animationTime={500}
           timeVariance={200}
+          onLogout={onLogout}
+          onPurgeExpired={onPurgeExpired}
         />
 
         {/* Actions */}
