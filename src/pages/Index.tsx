@@ -238,7 +238,9 @@ const Index = () => {
         onLogout={handleLogout}
       />
       {/* --- HERO SECTION BELOW HEADER --- */}
-      <HeroSection />
+      <div id="dashboard">
+        <HeroSection />
+      </div>
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Stats Cards */}
         <FridgeStatsCards
@@ -266,8 +268,20 @@ const Index = () => {
           </div>
           <SmartQuery items={items} />
           <NotificationPanel items={expiringItems} />
-          <ItemDashboard items={items} onRemoveItem={removeItem} />
-          <RecipeRecommendations items={items} />
+          <div id="items">
+            <ItemDashboard items={items} onRemoveItem={removeItem} />
+          </div>
+          <div id="recipes">
+            <RecipeRecommendations items={items} />
+          </div>
+          <div id="analytics">
+            <FridgeStatsCards
+              total={items.length}
+              expiring={expiringItems.length}
+              fresh={freshItemsCount}
+              expired={expiredItemsCount}
+            />
+          </div>
           {itemsLoading && (
             <div className="fixed inset-0 bg-black/20 dark:bg-black/40 flex items-center justify-center z-50">
               <div className="bg-white dark:bg-background rounded-lg p-8 shadow-lg text-center text-lg dark:text-black">

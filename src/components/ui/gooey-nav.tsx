@@ -122,9 +122,24 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
     textRef.current.innerText = element.innerText;
   };
 
+  const scrollToSection = (href: string) => {
+    if (href.startsWith('#')) {
+      const targetId = href.substring(1);
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    } else if (href === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const handleClick = (e: React.MouseEvent<HTMLLIElement> | React.KeyboardEvent<HTMLLIElement>, index: number) => {
     const liEl = e.currentTarget;
-    if (activeIndex === index) return;
+    const item = items[index];
     
     setActiveIndex(index);
     updateEffectPosition(liEl);
@@ -137,6 +152,9 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
     if (filterRef.current) {
       makeParticles(filterRef.current);
     }
+
+    // Handle navigation
+    scrollToSection(item.href);
   };
 
   const handleLinkKeyDown = (
@@ -153,6 +171,12 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
         );
       }
     }
+  };
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, index: number) => {
+    e.preventDefault();
+    const item = items[index];
+    scrollToSection(item.href);
   };
 
   useEffect(() => {
@@ -355,7 +379,7 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
               >
                 <a 
                   href={item.href}
-                  onClick={(e) => e.preventDefault()}
+                  onClick={(e) => handleLinkClick(e, index)}
                   onKeyDown={(e) => handleLinkKeyDown(e, index)}
                   className="outline-none no-underline"
                   style={{ color: "inherit" }}
