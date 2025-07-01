@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { FridgeItem } from '@/types/FridgeItem';
-import ItemCard from './ItemCard';
+import { Card3DList, CardData } from '@/components/ui/animated-3d-card';
 import { Card } from '@/components/ui/card';
+import { format } from 'date-fns';
 
 interface ItemDashboardProps {
   items: FridgeItem[];
@@ -16,6 +17,54 @@ const ItemDashboard: React.FC<ItemDashboardProps> = ({ items, onRemoveItem }) =>
     return aExpiry.getTime() - bExpiry.getTime();
   });
 
+  const getDaysUntilExpiry = (date: Date) => {
+    const today = new Date();
+    const diffTime = date.getTime() - today.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
+  const getCategoryEmoji = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'dairy': return '🥛';
+      case 'vegetables': return '🥬';
+      case 'fruits': return '🍎';
+      case 'meat': return '🥩';
+      case 'seafood': return '🐟';
+      case 'beverages': return '🥤';
+      case 'condiments': return '🍯';
+      case 'leftovers': return '🍽️';
+      default: return '📦';
+    }
+  };
+
+  const getThemeFromStatus = (status: string) => {
+    switch (status) {
+      case 'fresh': return 'success';
+      case 'warning': return 'warning';
+      case 'critical': return 'danger';
+      case 'expired': return 'neutral';
+      default: return 'primary';
+    }
+  };
+
+  const cards: CardData[] = sortedItems.map(item => {
+    const soonestExpiry = new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime()));
+    const daysLeft = getDaysUntilExpiry(soonestExpiry);
+    
+    const description = `${item.category} • ${daysLeft > 0 ? `${daysLeft} days left` : 'Expired'}
+Printed: ${format(item.printedExpiry, 'MMM dd, yyyy')}
+AI Predicted: ${format(item.predictedExpiry, 'MMM dd, yyyy')}`;
+
+    return {
+      id: item.id,
+      title: item.name,
+      description,
+      icon: <span className="text-2xl">{getCategoryEmoji(item.category)}</span>,
+      theme: getThemeFromStatus(item.status) as any,
+      onClick: () => onRemoveItem(item.id)
+    };
+  });
+
   return (
     <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Your Fridge Items</h2>
@@ -26,15 +75,14 @@ const ItemDashboard: React.FC<ItemDashboardProps> = ({ items, onRemoveItem }) =>
           <div className="text-gray-500">Add some items to start tracking expiry dates!</div>
         </div>
       ) : (
-        <div className="space-y-4">
-          {sortedItems.map(item => (
-            <ItemCard 
-              key={item.id} 
-              item={item} 
-              onRemove={() => onRemoveItem(item.id)} 
-            />
-          ))}
-        </div>
+        <Card3DList
+          cards={cards}
+          columns={3}
+          gap="lg"
+          size="sm"
+          variant="premium"
+          animated={true}
+        />
       )}
     </Card>
   );
