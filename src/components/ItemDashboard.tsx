@@ -61,7 +61,7 @@ AI Predicted: ${format(item.predictedExpiry, 'MMM dd, yyyy')}`;
       description,
       icon: <span className="text-2xl">{getCategoryEmoji(item.category)}</span>,
       theme: getThemeFromStatus(item.status) as any,
-      onClick: () => onRemoveItem(item.id)
+      onDelete: () => onRemoveItem(item.id)
     };
   });
 
