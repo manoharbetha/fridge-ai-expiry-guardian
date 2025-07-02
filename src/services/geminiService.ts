@@ -1,6 +1,5 @@
 
-const GEMINI_API_KEY = 'AIzaSyC30AJocdU8MIC6guSg5SkUOZ2V7dMAijk';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface ParsedFoodItem {
   name: string;
@@ -21,35 +20,17 @@ export class GeminiService {
   private async makeRequest(prompt: string): Promise<string> {
     console.log('Making Gemini API request with prompt:', prompt.substring(0, 100) + '...');
     
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }]
-      }),
+    const { data, error } = await supabase.functions.invoke('gemini-chat', {
+      body: { prompt }
     });
 
-    console.log('Gemini API response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Gemini API error response:', errorText);
-      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    if (error) {
+      console.error('Gemini function error:', error);
+      throw new Error(`Gemini function error: ${error.message}`);
     }
 
-    const data = await response.json();
-    console.log('Gemini API response data:', data);
-    
-    const responseText = data.candidates[0]?.content?.parts[0]?.text || '';
-    console.log('Extracted response text:', responseText);
-    
-    return responseText;
+    console.log('Gemini function response:', data);
+    return data.response || '';
   }
 
   async parseNaturalLanguageInput(input: string): Promise<ParsedFoodItem[]> {
