@@ -20,11 +20,11 @@ const THEMES = {
   primary: "from-slate-700 via-slate-800 to-slate-900",
   secondary: "from-blue-600 via-blue-700 to-blue-800",
   accent: "from-purple-600 via-purple-700 to-purple-800",
-  success: "from-emerald-600 via-emerald-700 to-emerald-800",
-  warning: "from-amber-600 via-amber-700 to-amber-800",
-  danger: "from-red-600 via-red-700 to-red-800",
+  success: "from-green-400 via-green-500 to-emerald-600",
+  warning: "from-yellow-400 via-orange-400 to-orange-500",
+  danger: "from-red-500 via-red-600 to-red-700",
   info: "from-cyan-600 via-cyan-700 to-cyan-800",
-  neutral: "from-gray-600 via-gray-700 to-gray-800",
+  neutral: "from-red-600 via-red-700 to-red-800",
 } as const;
 
 type ThemeType = keyof typeof THEMES;
