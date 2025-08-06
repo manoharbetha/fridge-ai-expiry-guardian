@@ -51,6 +51,18 @@ const ItemDashboard: React.FC<ItemDashboardProps> = ({ items, onRemoveItem }) =>
     const soonestExpiry = new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime()));
     const daysLeft = getDaysUntilExpiry(soonestExpiry);
     
+    // Calculate status dynamically based on days left
+    let calculatedStatus: string;
+    if (daysLeft <= 0) {
+      calculatedStatus = 'expired';
+    } else if (daysLeft <= 2) {
+      calculatedStatus = 'critical';
+    } else if (daysLeft <= 5) {
+      calculatedStatus = 'warning';
+    } else {
+      calculatedStatus = 'fresh';
+    }
+    
     const description = `${item.category} • ${daysLeft > 0 ? `${daysLeft} days left` : 'Expired'}
 Printed: ${format(item.printedExpiry, 'MMM dd, yyyy')}
 AI Predicted: ${format(item.predictedExpiry, 'MMM dd, yyyy')}`;
@@ -60,7 +72,7 @@ AI Predicted: ${format(item.predictedExpiry, 'MMM dd, yyyy')}`;
       title: item.name,
       description,
       icon: <span className="text-2xl">{getCategoryEmoji(item.category)}</span>,
-      theme: getThemeFromStatus(item.status) as any,
+      theme: getThemeFromStatus(calculatedStatus) as any,
       onDelete: () => onRemoveItem(item.id)
     };
   });
