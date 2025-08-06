@@ -42,7 +42,7 @@ const ItemDashboard: React.FC<ItemDashboardProps> = ({ items, onRemoveItem }) =>
       case 'fresh': return 'success';
       case 'warning': return 'warning';
       case 'critical': return 'danger';
-      case 'expired': return 'neutral';
+      case 'expired': return 'danger';
       default: return 'primary';
     }
   };
