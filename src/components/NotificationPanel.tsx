@@ -10,8 +10,26 @@ interface NotificationPanelProps {
 }
 
 const NotificationPanel: React.FC<NotificationPanelProps> = ({ items }) => {
-  const criticalItems = items.filter(item => item.status === 'critical');
-  const warningItems = items.filter(item => item.status === 'warning');
+  // Calculate status dynamically based on current dates
+  const today = new Date();
+  
+  const getDaysUntilExpiry = (item: FridgeItem) => {
+    const expiryDate = new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime()));
+    const diffTime = expiryDate.getTime() - today.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+  
+  const getItemStatus = (item: FridgeItem) => {
+    const daysLeft = getDaysUntilExpiry(item);
+    if (daysLeft <= 0) return 'expired';
+    if (daysLeft <= 2) return 'critical';
+    if (daysLeft <= 5) return 'warning';
+    return 'fresh';
+  };
+  
+  const expiredItems = items.filter(item => getItemStatus(item) === 'expired');
+  const criticalItems = items.filter(item => getItemStatus(item) === 'critical');
+  const warningItems = items.filter(item => getItemStatus(item) === 'warning');
 
   return (
     <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
@@ -21,13 +39,28 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ items }) => {
       </div>
 
       <div className="space-y-4">
-        {criticalItems.length === 0 && warningItems.length === 0 ? (
+        {expiredItems.length === 0 && criticalItems.length === 0 && warningItems.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-gray-400 text-lg mb-2">All good!</div>
             <div className="text-gray-500 text-sm">No items expiring soon</div>
           </div>
         ) : (
           <>
+            {expiredItems.map(item => (
+              <div key={item.id} className="flex items-start gap-3 p-3 bg-red-100 rounded-lg border border-red-300">
+                <AlertTriangle className="w-4 h-4 text-red-700 mt-1 flex-shrink-0" />
+                <div className="flex-1">
+                  <div className="font-medium text-red-900">{item.name}</div>
+                  <div className="text-sm text-red-700">
+                    Expired {formatDistanceToNow(new Date(Math.min(item.printedExpiry.getTime(), item.predictedExpiry.getTime())), { addSuffix: true })}
+                  </div>
+                  <Badge className="bg-red-200 text-red-900 border-red-300 text-xs mt-1 transition-colors hover:bg-red-300">
+                    Expired
+                  </Badge>
+                </div>
+              </div>
+            ))}
+
             {criticalItems.map(item => (
               <div key={item.id} className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
                 <AlertTriangle className="w-4 h-4 text-red-600 mt-1 flex-shrink-0" />

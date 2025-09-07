@@ -22,6 +22,7 @@ const ItemDashboard: React.FC<ItemDashboardProps> = ({
   // Check for expired items and send notifications
   useEffect(() => {
     if (items.length > 0 && userEmail) {
+      console.log('Checking expired items for notifications...', items.length);
       checkAndNotifyExpiredItems(items, userEmail);
     }
   }, [items, userEmail]);
