@@ -1,16 +1,30 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FridgeItem } from '@/types/FridgeItem';
 import { Card3DList, CardData } from '@/components/ui/animated-3d-card';
 import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
+import { notifyExpiry, checkAndNotifyExpiredItems } from '@/utils/webhooks';
 
 interface ItemDashboardProps {
   items: FridgeItem[];
   onRemoveItem: (id: string) => void;
+  onEditItem: (id: string) => void;
+  userEmail?: string;
 }
 
-const ItemDashboard: React.FC<ItemDashboardProps> = ({ items, onRemoveItem }) => {
+const ItemDashboard: React.FC<ItemDashboardProps> = ({ 
+  items, 
+  onRemoveItem, 
+  onEditItem, 
+  userEmail = 'user@example.com' 
+}) => {
+  // Check for expired items and send notifications
+  useEffect(() => {
+    if (items.length > 0 && userEmail) {
+      checkAndNotifyExpiredItems(items, userEmail);
+    }
+  }, [items, userEmail]);
   const sortedItems = [...items].sort((a, b) => {
     const aExpiry = new Date(Math.min(a.printedExpiry.getTime(), a.predictedExpiry.getTime()));
     const bExpiry = new Date(Math.min(b.printedExpiry.getTime(), b.predictedExpiry.getTime()));
@@ -73,7 +87,8 @@ AI Predicted: ${format(item.predictedExpiry, 'MMM dd, yyyy')}`;
       description,
       icon: <span className="text-2xl">{getCategoryEmoji(item.category)}</span>,
       theme: getThemeFromStatus(calculatedStatus) as any,
-      onDelete: () => onRemoveItem(item.id)
+      onDelete: () => onRemoveItem(item.id),
+      onEdit: () => onEditItem(item.id)
     };
   });
 

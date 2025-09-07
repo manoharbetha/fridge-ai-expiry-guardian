@@ -52,6 +52,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<FridgeItem[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<FridgeItem | null>(null);
   const navigate = useNavigate();
   const [itemsLoading, setItemsLoading] = useState(false);
 
@@ -161,6 +162,36 @@ const Index = () => {
     }
   };
 
+  // Handle edit item
+  const handleEditItem = (id: string) => {
+    const itemToEdit = items.find(item => item.id === id);
+    if (itemToEdit) {
+      setEditingItem(itemToEdit);
+    }
+  };
+
+  // Update item in Supabase
+  const updateItem = async (updatedItem: FridgeItem) => {
+    if (!session?.user) return;
+    const status = getStatusFromPredicted(updatedItem.predictedExpiry);
+    const dbRow = fridgeItemToDbRow({ ...updatedItem, status }, session.user.id);
+    
+    const { data, error } = await supabase
+      .from('food_items')
+      .update(dbRow)
+      .eq('id', updatedItem.id)
+      .select()
+      .maybeSingle();
+      
+    if (error) {
+      toast.error('Error updating item.');
+    } else if (data) {
+      setItems(prev => prev.map(item => item.id === updatedItem.id ? parseDbFridgeItem(data) : item));
+      setEditingItem(null);
+      toast.success('Item updated successfully!');
+    }
+  };
+
   // Remove expired items from Supabase
   const removeExpiredItems = async () => {
     const today = new Date();
@@ -266,7 +297,12 @@ const Index = () => {
           </div>
           <SmartQuery items={items} />
           <NotificationPanel items={expiringItems} />
-          <ItemDashboard items={items} onRemoveItem={removeItem} />
+          <ItemDashboard 
+            items={items} 
+            onRemoveItem={removeItem} 
+            onEditItem={handleEditItem}
+            userEmail={session.user.email || 'user@example.com'}
+          />
           <RecipeRecommendations items={items} />
           {itemsLoading && (
             <div className="fixed inset-0 bg-black/20 dark:bg-black/40 flex items-center justify-center z-50">
@@ -283,6 +319,20 @@ const Index = () => {
               <AddItemForm 
                 onAddItem={addItem} 
                 onCancel={() => setShowAddForm(false)} 
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Edit Item Modal */}
+        {editingItem && (
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-background rounded-2xl p-6 w-full max-w-md shadow-2xl">
+              <AddItemForm 
+                initialItem={editingItem}
+                onAddItem={updateItem} 
+                onCancel={() => setEditingItem(null)}
+                isEditing={true}
               />
             </div>
           </div>

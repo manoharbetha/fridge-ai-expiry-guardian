@@ -13,7 +13,8 @@ import {
   Star,
   Database,
   Shield,
-  Trash2,   
+  Trash2,
+  Edit3,
 } from "lucide-react";
 
 const THEMES = {
@@ -43,6 +44,7 @@ interface Card3DProps {
   gradient?: string;
   onClick?: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
   className?: string;
   size?: "sm" | "md" | "lg";
   variant?: "default" | "minimal" | "premium";
@@ -60,6 +62,7 @@ interface CardData {
   gradient?: string;
   onClick?: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
   disabled?: boolean;
   loading?: boolean;
 }
@@ -137,6 +140,7 @@ const Card3D = React.forwardRef<HTMLDivElement, Card3DProps>(
       gradient,
       onClick,
       onDelete,
+      onEdit,
       className,
       size = "md",
       variant = "default",
@@ -348,19 +352,37 @@ const Card3D = React.forwardRef<HTMLDivElement, Card3DProps>(
               </motion.div>
             )}
 
-{onDelete && (
-              <motion.button
-                className="bg-red-500/80 hover:bg-red-600 text-white p-2 rounded-full backdrop-blur-sm transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Trash2 className="w-4 h-4" />
-              </motion.button>
+{(onEdit || onDelete) && (
+              <div className="flex items-center gap-2">
+                {onEdit && (
+                  <motion.button
+                    className="bg-blue-500/80 hover:bg-blue-600 text-white p-2 rounded-full backdrop-blur-sm transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit();
+                    }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </motion.button>
+                )}
+                {onDelete && (
+                  <motion.button
+                    className="bg-red-500/80 hover:bg-red-600 text-white p-2 rounded-full backdrop-blur-sm transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete();
+                    }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </motion.button>
+                )}
+              </div>
             )}
           </div>
 
@@ -499,6 +521,7 @@ const Card3DList: React.FC<Card3DListProps> = ({
             gradient={card.gradient}
             onClick={card.onClick}
             onDelete={card.onDelete}
+            onEdit={card.onEdit}
             size={size}
             variant={variant}
             disabled={card.disabled}

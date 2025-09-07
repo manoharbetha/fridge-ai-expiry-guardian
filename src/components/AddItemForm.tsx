@@ -12,15 +12,22 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface AddItemFormProps {
-  onAddItem: (item: Omit<FridgeItem, 'id' | 'status'>) => void;
+  onAddItem: (item: Omit<FridgeItem, 'id' | 'status'> | FridgeItem) => void;
   onCancel: () => void;
+  initialItem?: FridgeItem;
+  isEditing?: boolean;
 }
 
-const AddItemForm: React.FC<AddItemFormProps> = ({ onAddItem, onCancel }) => {
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
-  const [openDate, setOpenDate] = useState<Date>(new Date());
-  const [printedExpiry, setPrintedExpiry] = useState<Date>();
+const AddItemForm: React.FC<AddItemFormProps> = ({ 
+  onAddItem, 
+  onCancel, 
+  initialItem, 
+  isEditing = false 
+}) => {
+  const [name, setName] = useState(initialItem?.name || '');
+  const [category, setCategory] = useState(initialItem?.category || '');
+  const [openDate, setOpenDate] = useState<Date>(initialItem?.openDate || new Date());
+  const [printedExpiry, setPrintedExpiry] = useState<Date | undefined>(initialItem?.printedExpiry);
 
   const categories = [
     'dairy', 'vegetables', 'fruits', 'meat', 'seafood', 
@@ -57,22 +64,37 @@ const AddItemForm: React.FC<AddItemFormProps> = ({ onAddItem, onCancel }) => {
 
     const predictedExpiry = predictExpiry(category, openDate, printedExpiry);
 
-    const newItem: Omit<FridgeItem, 'id' | 'status'> = {
-      name,
-      category,
-      openDate,
-      printedExpiry,
-      predictedExpiry,
-      notificationSent: false
-    };
-
-    onAddItem(newItem);
+    if (isEditing && initialItem) {
+      // Update existing item
+      const updatedItem: FridgeItem = {
+        ...initialItem,
+        name,
+        category,
+        openDate,
+        printedExpiry,
+        predictedExpiry,
+      };
+      onAddItem(updatedItem);
+    } else {
+      // Create new item
+      const newItem: Omit<FridgeItem, 'id' | 'status'> = {
+        name,
+        category,
+        openDate,
+        printedExpiry,
+        predictedExpiry,
+        notificationSent: false
+      };
+      onAddItem(newItem);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-800">Add New Item</h2>
+        <h2 className="text-xl font-bold text-gray-800">
+          {isEditing ? 'Edit Item' : 'Add New Item'}
+        </h2>
         <Button onClick={onCancel} variant="ghost" size="sm">
           <X className="w-4 h-4" />
         </Button>
@@ -168,7 +190,7 @@ const AddItemForm: React.FC<AddItemFormProps> = ({ onAddItem, onCancel }) => {
           className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
           disabled={!name || !category || !printedExpiry}
         >
-          Add Item
+          {isEditing ? 'Update Item' : 'Add Item'}
         </Button>
         <Button
           type="button"
