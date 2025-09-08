@@ -14,7 +14,7 @@ interface ItemDashboardProps {
   userEmail?: string;
 }
 
-const ItemDashboard: React.FC<ItemDashboardProps> = React.memo(({ 
+const ItemDashboard: React.FC<ItemDashboardProps> = ({ 
   items, 
   onRemoveItem, 
   onEditItem,
@@ -149,8 +149,6 @@ AI Predicted: ${format(item.predictedExpiry, 'MMM dd, yyyy')}`;
       )}
     </Card>
   );
-});
+};
 
-ItemDashboard.displayName = 'ItemDashboard';
-
-export default ItemDashboard;
+export default React.memo(ItemDashboard);
