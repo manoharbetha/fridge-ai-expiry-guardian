@@ -192,6 +192,31 @@ const Index = () => {
     }
   };
 
+  // Update specific fields of an item
+  const updateItemFields = async (id: string, updates: Partial<FridgeItem>) => {
+    if (!session?.user) return;
+    
+    const currentItem = items.find(item => item.id === id);
+    if (!currentItem) return;
+    
+    const updatedItem = { ...currentItem, ...updates };
+    const status = getStatusFromPredicted(updatedItem.predictedExpiry);
+    const dbRow = fridgeItemToDbRow({ ...updatedItem, status }, session.user.id);
+    
+    const { data, error } = await supabase
+      .from('food_items')
+      .update(dbRow)
+      .eq('id', id)
+      .select()
+      .maybeSingle();
+      
+    if (error) {
+      console.error('Error updating item fields:', error);
+    } else if (data) {
+      setItems(prev => prev.map(item => item.id === id ? parseDbFridgeItem(data) : item));
+    }
+  };
+
   // Remove expired items from Supabase
   const removeExpiredItems = async () => {
     const today = new Date();
@@ -301,6 +326,7 @@ const Index = () => {
             items={items} 
             onRemoveItem={removeItem} 
             onEditItem={handleEditItem}
+            onUpdateItem={updateItemFields}
             userEmail={session.user.email || 'user@example.com'}
           />
           <RecipeRecommendations items={items} />

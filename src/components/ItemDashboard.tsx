@@ -1,31 +1,66 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { FridgeItem } from '@/types/FridgeItem';
 import { Card3DList, CardData } from '@/components/ui/animated-3d-card';
 import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { notifyExpiry, checkAndNotifyExpiredItems } from '@/utils/webhooks';
+import { notifyExpiry } from '@/utils/webhooks';
 
 interface ItemDashboardProps {
   items: FridgeItem[];
   onRemoveItem: (id: string) => void;
   onEditItem: (id: string) => void;
+  onUpdateItem: (id: string, updates: Partial<FridgeItem>) => void;
   userEmail?: string;
 }
 
-const ItemDashboard: React.FC<ItemDashboardProps> = ({ 
+const ItemDashboard: React.FC<ItemDashboardProps> = React.memo(({ 
   items, 
   onRemoveItem, 
-  onEditItem, 
+  onEditItem,
+  onUpdateItem,
   userEmail = 'user@example.com' 
 }) => {
+  const notifiedItemsRef = useRef<Set<string>>(new Set());
+
   // Check for expired items and send notifications
-  useEffect(() => {
-    if (items.length > 0 && userEmail) {
-      console.log('Checking expired items for notifications...', items.length);
-      checkAndNotifyExpiredItems(items, userEmail);
+  const checkExpiredItems = useCallback(async () => {
+    if (!items.length || !userEmail) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (const item of items) {
+      const printedExpiry = new Date(item.printedExpiry);
+      const predictedExpiry = new Date(item.predictedExpiry);
+      const expiryDate = new Date(Math.min(printedExpiry.getTime(), predictedExpiry.getTime()));
+      expiryDate.setHours(0, 0, 0, 0);
+
+      const daysLeft = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Check if item is expired and notification hasn't been sent
+      if (daysLeft <= 0 && !item.notificationSent && !notifiedItemsRef.current.has(item.id)) {
+        console.log(`Sending notification for expired item: ${item.name}`);
+        notifiedItemsRef.current.add(item.id);
+        
+        const success = await notifyExpiry({
+          itemName: item.name,
+          expiryDate: expiryDate.toISOString().split('T')[0],
+          userEmail: userEmail
+        });
+        
+        if (success) {
+          console.log(`Successfully sent notification for ${item.name}`);
+          // Update the item to mark notification as sent
+          onUpdateItem(item.id, { notificationSent: true });
+        }
+      }
     }
-  }, [items, userEmail]);
+  }, [items, userEmail, onUpdateItem]);
+
+  useEffect(() => {
+    checkExpiredItems();
+  }, [checkExpiredItems]);
   const sortedItems = [...items].sort((a, b) => {
     const aExpiry = new Date(Math.min(a.printedExpiry.getTime(), a.predictedExpiry.getTime()));
     const bExpiry = new Date(Math.min(b.printedExpiry.getTime(), b.predictedExpiry.getTime()));
@@ -114,6 +149,8 @@ AI Predicted: ${format(item.predictedExpiry, 'MMM dd, yyyy')}`;
       )}
     </Card>
   );
-};
+});
+
+ItemDashboard.displayName = 'ItemDashboard';
 
 export default ItemDashboard;
