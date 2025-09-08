@@ -126,9 +126,30 @@ const Index = () => {
     if (error) {
       toast.error('Error adding item.');
     } else if (data) {
-      setItems(prev => [...prev, parseDbFridgeItem(data)]);
+      const parsedItem = parseDbFridgeItem(data);
+      setItems(prev => [...prev, parsedItem]);
       setShowAddForm(false);
       toast.success('Item added to your fridge!');
+      
+      // Check if the newly added item is already expired and send immediate notification
+      const today = new Date();
+      const expiryDate = new Date(Math.min(parsedItem.printedExpiry.getTime(), parsedItem.predictedExpiry.getTime()));
+      const daysLeft = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysLeft <= 0 && !parsedItem.notificationSent && session.user.email) {
+        console.log(`Immediately sending notification for expired item: ${parsedItem.name}`);
+        // Import and use the webhook function
+        import('../utils/webhooks').then(({ notifyExpiry }) => {
+          notifyExpiry({
+            itemName: parsedItem.name,
+            expiryDate: expiryDate.toISOString().split('T')[0],
+            userEmail: session.user.email!
+          }).then(() => {
+            // Update the item to mark notification as sent
+            updateItemFields(parsedItem.id, { notificationSent: true });
+          });
+        });
+      }
     }
   };
 
