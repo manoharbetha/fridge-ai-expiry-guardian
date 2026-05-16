@@ -1,0 +1,4 @@
+# Remap bot/automated commit authors to the real repository owner.
+# This affects display in `git log`, `git shortlog`, etc.
+manoharbetha <manoharbetha.mb@gmail.com> gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com>
+manoharbetha <manoharbetha.mb@gmail.com> lovable-dev[bot] <lovable-dev[bot]@users.noreply.github.com>
